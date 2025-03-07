@@ -1,0 +1,11 @@
+:root {
+    --background-body: #f9f9f9;
+    --color-primary: #5e35b1; /* Couleur Violet Perfometrics 😏 */
+    --color-secondary: #ff4081;
+}
+
+button {
+    background-color: var(--color-primary);
+    border-radius: 10px;
+    color: white;
+}
