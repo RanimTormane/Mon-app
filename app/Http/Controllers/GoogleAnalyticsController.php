@@ -3,24 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Services\GoogleAnalyticsService;
+use Illuminate\Http\Request;
 
 class GoogleAnalyticsController extends Controller
-{//property that store the instance of the class 
-    protected $analytics;
-//initialize this property 
-    public function __construct(GoogleAnalyticsService $analytics)
+{
+    protected $googleAnalyticsService;
+
+    public function __construct(GoogleAnalyticsService $googleAnalyticsService)
     {
-        $this->analytics = $analytics;
+        $this->googleAnalyticsService = $googleAnalyticsService;
     }
 
     public function index()
     {
-        $data = $this->analytics->getAnalyticsData(
-            '476634976', //  VIEW ID
-            '2024-02-01',
-            '2024-03-01'
-        );
-//compact('data') :helper function create associative table 
+        
+        $propertyId = 'G-C23DK1RE7E'; 
+        $startDate = '2023-01-01'; 
+        $endDate = '2023-12-31';  
+
+        $data = $this->googleAnalyticsService->getAnalyticsData($propertyId, $startDate, $endDate);
+
+        // Passer les données à la vue
         return view('google-analytics', compact('data'));
     }
 }
+

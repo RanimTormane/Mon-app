@@ -3,8 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\APIsController;
 use App\Http\Controllers\GoogleAnalyticsController;
+use App\Http\Controllers\FacebookController;
+use App\Http\Controllers\ChartController;
 
-use App\Http\Controllers\UserController;
+
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -17,8 +21,9 @@ use App\Http\Controllers\UserController;
 |
 */
 
-Route::view('/', 'home');
-
+Route::view('/', 'home')
+    ->name('home');
+Route::get('user-chart',[ChartController::class,'chart']);
 Route::controller(APIsController::class)
     ->prefix('APIs')
     ->name('APIs.')
@@ -47,10 +52,15 @@ Route::controller(APIsController::class)
         ->name('destroy');
     Route::get('/{id}/updateStatus', 'updateStatus')
         ->name('updateStatus');
-
+    
 });
 
 Route::get('/google-analytics', [GoogleAnalyticsController::class, 'index']);
 
-Route::resource('APIs', APIsController::class);
-Route::resource('users', UserController::class);
+
+
+
+Route::get('/facebook/data', [FacebookController::class, 'getFacebookData']);
+Route::get('/show-likes', function () {
+    return view('facebook_likes');  // Affiche la vue 'facebook_likes'
+});

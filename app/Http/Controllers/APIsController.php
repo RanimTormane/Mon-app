@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\API;
 use App\Http\Requests\SaveApiRequest;
-
-
+ 
 
 class APIsController extends Controller
 {
@@ -33,9 +32,10 @@ class APIsController extends Controller
    {
      $status = $request->has('status') ? 1 : 0;
      $api = API::create($request->validated());
-      
-      return redirect()->route('APIs.index', $api)
-                     ->with('status','API created');
+     session()->flash('alert', 'API created successfully!');
+     session()->flash('alert-type', 'success');
+      return redirect()->route('APIs.index', $api);
+                     
    }
 
    public function show(API $api){
@@ -50,15 +50,19 @@ class APIsController extends Controller
 
    public function update(SaveApiRequest $request, API $api){
       $api->update($request->validated());
-      return redirect()->route('APIs.index', $api)
-                     ->with('status','API updated');
-
+      session()->flash('alert', 'API updated successfully!');
+      session()->flash('alert-type', 'info');
+  
+      return redirect()->route('APIs.index', $api);
+                    
    }
    public function destroy(API $api)
    {
       $api->delete();
-      return redirect()->route('APIs.index')
-                     ->with('status','API deleted');
+      session()->flash('alert', 'API deleted successfully!');
+      session()->flash('alert-type', 'error');
+      return redirect()->route('APIs.index');
+                     
    }
    public function updateStatus($id)
    {
@@ -68,9 +72,18 @@ class APIsController extends Controller
          $api->status = !$api->status;
          $api->save();
      }
+     if ($api->status == 1 ){
+      session()->flash('alert', 'API is active now');
+   
+     }
+     else{
+      session()->flash('alert', 'API inactive');
+     
+     }
 
       return redirect()->route('APIs.index');
    }
+   
 
 }
  

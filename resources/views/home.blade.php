@@ -1,7 +1,9 @@
-<x-layout>
-<h1>Welcome</h1>
-<x-menu/>
 
+
+<x-layout>
+<div class="main-container">
+<x-menu/>
+</div>
 
 
 </x-layout>

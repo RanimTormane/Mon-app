@@ -12,8 +12,11 @@
     <input type="hidden" name="status" value="0">
     <input type="checkbox" name="status" id="status" value="1" {{ old('status', $api->status ?? 1) == 1 ? 'checked' : '' }}>
 
-     
+   
     <button>Save</button>
+    <button type="button" onclick="window.location.href='{{ route('APIs.index') }}'">Cancel</button>
+  
+ 
 
 
     <!-- old :it's a helper function that make the data allowing  in the form

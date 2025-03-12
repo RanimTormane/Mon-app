@@ -1,29 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!--classeless style sheet-->
-<!--<link rel="stylesheet" 
-href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">-->
-<style>
-body {
-  background: linear-gradient(135deg,rgb(208, 207, 221),rgb(222, 207, 217),rgb(204, 156, 184));
-  color: #ffffff;
-}
-
-h1, h2 {
-  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4);
-}
-
-button {
-  background:rgb(197, 239, 237);
-  border: none;
-  padding: 10px 20px;
-  border-radius: 20px;
-  box-shadow: 0 0 20px rgba(242, 204, 226, 0.8);
-}
 
 
-</style>
+
+
+
 <style>
            
         form {
@@ -58,7 +40,7 @@ button {
 
         }
         button {
-            background-color:rgb(212, 154, 187);
+            background-color:rgb(228, 68, 159);
             color: white;
             padding: 10px 15px;
             border: none;
@@ -66,16 +48,20 @@ button {
             cursor: pointer;
             width: 100%;
         }
+     
         button:hover {
             background-color:rgb(191, 48, 107);
         }
+        
     </style>
+    
+
     <title>Laravel App</title>
 </head>
 <body>
 
 
-
+<!--display status created , updated, activated ,deleted...-->
 @if (session('status'))
     <div >{{session ('status')}}</div>
 @endif

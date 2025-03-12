@@ -22,33 +22,42 @@ class GoogleAnalyticsService
 
     public function getAnalyticsData($propertyId, $startDate, $endDate)
     {
-       // create an object to make the request to the API
-        $analyticsData = new Google_Service_AnalyticsData($this->client);
-        $request = new Google_Service_AnalyticsData_RunReportRequest();
+        try {
+            // Create an object for the request of api 
+            $analyticsData = new Google_Service_AnalyticsData($this->client);
+            $request = new Google_Service_AnalyticsData_RunReportRequest();
 
-        // Gives the data between start date and end date 
-        $dateRange = new Google_Service_AnalyticsData_DateRange();
-        $dateRange->setStartDate($startDate);  
-        $dateRange->setEndDate($endDate);  
+            // define the plage of date
+            $dateRange = new Google_Service_AnalyticsData_DateRange();
+            $dateRange->setStartDate($startDate);  
+            $dateRange->setEndDate($endDate);  
 
-        // ADD la plage de dates à la request
-        $request->setDateRanges([$dateRange]);
+            // add the plage of date on the request 
+            $request->setDateRanges([$dateRange]);
 
-        // Define les dimensions (exp: pays)
-        $request->setDimensions([
-            new Google_Service_AnalyticsData_Dimension(['name' => 'country']),
-        ]);
+            // Define the dimensions (exp : pays)
+            $request->setDimensions([new Google_Service_AnalyticsData_Dimension(['name' => 'country'])]);
 
-        // Define the metrics (exp : sessions, newUsers, screenPageViews)
-        $request->setMetrics([
-            new Google_Service_AnalyticsData_Metric(['name' => 'sessions']),
-            new Google_Service_AnalyticsData_Metric(['name' => 'newUsers']),
-            new Google_Service_AnalyticsData_Metric(['name' => 'screenPageViews']),  // use validated metrics
-        ]);
+            // Define the metrics  (exp : sessions, newUsers, screenPageViews)
+            $request->setMetrics([
+                new Google_Service_AnalyticsData_Metric(['name' => 'sessions']),
+                new Google_Service_AnalyticsData_Metric(['name' => 'newUsers']),
+                new Google_Service_AnalyticsData_Metric(['name' => 'screenPageViews']), 
+            ]);
 
-        // Effect the request
-        $results = $analyticsData->properties->runReport("properties/$propertyId", $request);
+            // Effect the request 
 
-        return $results->getRows();
+            $results = $analyticsData->properties->runReport("properties/$propertyId", $request);
+
+            if (count($results->getRows()) === 0) {
+                return [];  // return empty table 
+            }
+    
+            return $results->getRows();
+        } catch (\Exception $e) {
+        
+            return [];
+        }
     }
 }
+

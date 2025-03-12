@@ -1,6 +1,7 @@
 <x-layout>
-<h1>New API</h1>
+<h1>ADD API</h1>
 <x-errors/>
+
 
 
 <form method="post" action="{{ route('APIs.store')}} ">
