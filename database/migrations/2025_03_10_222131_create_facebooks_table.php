@@ -29,8 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('facebooks', function (Blueprint $table) {
-            $table->dropColumn('liked_at');
-        });
+        Schema::dropIfExists('facebooks');
     }
 };

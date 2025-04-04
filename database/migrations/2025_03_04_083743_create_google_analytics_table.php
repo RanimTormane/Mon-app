@@ -19,7 +19,6 @@ return new class extends Migration
             $table->integer('users');
             $table->float('avg_session_duration');
             $table->float('bounce_rate');
-            $table->float ('page');
             $table->float('pageviews_per_session');  
             $table->integer('new_visitors');  
             $table->integer('returning_visitors');  

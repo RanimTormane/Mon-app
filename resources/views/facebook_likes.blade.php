@@ -19,7 +19,7 @@
                     let likesList = document.getElementById('likes-list');
                     data.likes.data.forEach(like => {
                         let li = document.createElement('li');
-                        li.textContent = like.name;  // Assurez-vous que "name" est la clé correcte dans votre réponse
+                        li.textContent = like.name//+'-'+like.created_time;  // Assurez-vous que "name" est la clé correcte dans votre réponse
                         likesList.appendChild(li);
                     });
                 } else {

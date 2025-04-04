@@ -8,6 +8,8 @@
    
 </head>
 <body>
+
+
     <div class="main-container">
        <x-menu/>
 
@@ -63,7 +65,7 @@
             @endif
         </div>
     </div>
-
+    <div id="app"></div>
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -95,5 +97,9 @@
             });
         </script>
     @endif
+
+
+
+   
 </body>
 </html>

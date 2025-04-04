@@ -4,7 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\APIsController;
 use App\Http\Controllers\GoogleAnalyticsController;
 use App\Http\Controllers\FacebookController;
-use App\Http\Controllers\ChartController;
+use App\Http\Controllers\KPIsController;
+use App\Http\Controllers\InstagramAuthController;
+use App\Http\Controllers\DashboardController;
 
 
 
@@ -23,7 +25,7 @@ use App\Http\Controllers\ChartController;
 
 Route::view('/', 'home')
     ->name('home');
-Route::get('user-chart',[ChartController::class,'chart']);
+
 Route::controller(APIsController::class)
     ->prefix('APIs')
     ->name('APIs.')
@@ -64,3 +66,23 @@ Route::get('/facebook/data', [FacebookController::class, 'getFacebookData']);
 Route::get('/show-likes', function () {
     return view('facebook_likes');  // Affiche la vue 'facebook_likes'
 });
+Route::controller(KPIsController::class)
+    ->prefix('KPIs')
+    
+    ->group(function(){
+        Route::get('/create','create'); 
+        Route::post('/store','store');
+       
+    });
+
+
+    Route::get('/auth/instagram', [InstagramAuthController::class, 'redirectToInstagram']);
+    Route::get('/auth/instagram/callback', [InstagramAuthController::class, 'instagramCallback']);
+    Route::post('/instagram/save-token', [InstagramAuthController::class, 'saveInstagramToken']);
+    Route::post('/get-multiple-instagram-users', [InstagramAuthController::class, 'getMultipleInstagramUsers']);
+
+    
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+    Route::get('/dashboard/client/{id}', [DashboardController::class, 'showClientDashboard'])->name('dashboard.client');
+

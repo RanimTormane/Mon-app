@@ -23,7 +23,7 @@ class GoogleAnalyticsController extends Controller
 
         $data = $this->googleAnalyticsService->getAnalyticsData($propertyId, $startDate, $endDate);
 
-        // Passer les données à la vue
+        
         return view('google-analytics', compact('data'));
     }
 }

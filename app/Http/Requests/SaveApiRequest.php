@@ -24,7 +24,16 @@ class SaveApiRequest extends FormRequest
         return [
             'name'=>'required|max:100',
             'description'=>'nullable|min:3',
-            'token'=>'required|max:100',
+            'token'=>'required|max:300',
         ];
     }
+    public function messages()
+{
+    return [
+        'name.required' => 'The name is required.',
+        'description.min' => 'The description must contain at least 3 characters.',
+        'token.required' => 'The token is required.',
+      
+    ];
+}
 }
