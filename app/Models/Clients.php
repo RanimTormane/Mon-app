@@ -13,16 +13,19 @@ class Clients extends Model
         'instagram_id',
         'username',
         'profile_picture_url',
-        'permissions', 
+        'action',
+        'dashboards', 
     ];
 
-    // Définir le cast pour la colonne permissions (pour la convertir automatiquement en tableau)
-    protected $casts = [
-        'permissions' => 'array', // Permet de manipuler 'permissions' comme un tableau
-    ];
+   
 
     public function posts()
     {
-        return $this->hasMany(posts::class, 'client_id'); // relation inverse
+        return $this->hasMany(posts::class, 'client_id');
+        
+    }
+    public function KPIs(){
+        return $this->hasMany(KPIs::class, 'client_id');
+        
     }
 }

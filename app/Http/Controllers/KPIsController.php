@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\KPIs;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreKpiRequest;
 
 class KPIsController extends Controller
 {
@@ -30,7 +31,7 @@ class KPIsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreKpiRequest $request)
     {
         $kpi = KPIs::create($request->validated());
         $response = [

@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('kpi', function (Blueprint $table) {
             $table->id();
+           $table->foreignId('client_id')->nullable()->constrained('clients')->onDelete('cascade');
+
             $table->string('name'); 
             $table->decimal('value', 8, 2); 
-            $table->string('trend'); 
-            $table->enum('status', ['Bon', 'Excellent', 'Moyen', 'Faible']);
-            $table->string('actions')->nullable();  
+            $table->string('trend');
+            $table->string('status');
+             
             $table->timestamps();
         });
     }

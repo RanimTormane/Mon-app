@@ -50,21 +50,15 @@ class ClientsController extends Controller
     if ($response->successful()) {
         $data = $response->json();
 
-        // Récupérer les permissions (ici, vous pouvez les envoyer comme un tableau JSON ou une structure clé-valeur)
        
-        $permissions = [
-            'view' => true, // ✅ forcé, même si on envoie "false" dans la requête
-            'edit' => $request->input('edit', false),
-            'delete' => $request->input('delete', false),
-        ];
-        
         // Utilisation de updateOrCreate pour insérer ou mettre à jour un client
         $client = Clients::updateOrCreate(
             ['instagram_id' => $data['id']],
             [
                 'username' => $data['username'],
                 'profile_picture_url' => $data['profile_picture_url'] ?? null,
-                'permissions' => $permissions ? json_encode($permissions) : null // Assurez-vous que permissions est bien encodé en JSON
+                'action'=>null,
+                'dashboards' => null,
             ]
         );
         
@@ -88,18 +82,10 @@ class ClientsController extends Controller
     /**
      * Display the specified resource.
      */
-   /*public function show($id)
+   public function show()
 {
-    // Recherche du client par ID
-    $client = Clients::find($id);//make permissions to clients
-
-    // Vérifie si le client existe
-    if (!$client) {
-        return response()->json(['error' => 'Client non trouvé'], 404);
-    }
-
-    return response()->json($client);
-}*/
+   
+}
 
 
     /**
@@ -123,7 +109,12 @@ class ClientsController extends Controller
      */
     public function destroy(Clients $clients)
     {
-        //
+       $kpi->delete();
+       if (request()->wantsJson()) {
+        return response()->json([
+            'message' => 'API deleted successfully!'
+        ]);
+    }
     }
   
     }

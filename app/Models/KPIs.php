@@ -9,5 +9,8 @@ class KPIs extends Model
 {
     use HasFactory;
     protected $table = 'kpi';
-    protected $fillable = ['name','value','trend','status','actions'];
+    protected $fillable = ['client_id','name','value','trend','status'];
+    public function client(){
+        return $this->belongTo(Clients::class,'client_id');
+    }
 }

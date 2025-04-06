@@ -36,7 +36,8 @@ Route::get('/show/{api}', [APIsController::class, 'show']);
 Route::patch('/status/{api}', [APIsController::class, 'updateStatus']);
 Route::get('/facebookData', [FacebookController::class, 'getFacebookData']);
 Route::apiResource('/KPIs',KPIsController::class);
-Route::get('/add-kpi', [KPIsController::class, 'store']);
+Route::post('/add-kpi', [KPIsController::class, 'store']);
+Route::delete('/delete',[KPIsController::class, 'destroy']);
 Route::get('/dashboard', [DashboardController::class, 'index']);  // Return la list des clients en JSON
 Route::get('/dashboard/client/{id}', [DashboardController::class, 'showClientDashboard']);  // Return un client spécifique en JSON
 
@@ -56,7 +57,9 @@ Route::get('/test-engagement', [PostsController::class, 'transformEngagementData
 
 
 Route::get('/engagement/{clientId}', [PostsController::class, 'calculateEngagementKPI']);
-Route::get('/clients/{id}', [ClientsController::class, 'show']);
+//Route::get('/clients/{id}', [ClientsController::class, 'show']);
    //->middleware('check.permissions:view');
 
 Route::get('/engagement/posts/{clientId}', [PostsController::class, 'getEngagementPerPost']);
+Route::get('/kpis', [PostsController::class, 'showAllKpis']);
+

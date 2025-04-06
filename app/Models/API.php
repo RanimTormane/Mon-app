@@ -11,4 +11,8 @@ class API extends Model
 
     protected $table = 'api';
     protected $fillable = ['name','description','token','status','actions'];
+
+    public function posts(){
+        return $this->hasMany(posts::class, 'api_id'); // relation inverse ,récupérer tous les posts liés à une API 
+}
 }

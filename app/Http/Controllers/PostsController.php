@@ -6,6 +6,9 @@ use App\Models\posts;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\Clients;
+use App\Models\API;
+use App\Models\KPIs;
+
 class PostsController extends Controller
 {
 
@@ -15,15 +18,18 @@ class PostsController extends Controller
         // Récupère l'access_token et client_id depuis les paramètres de la requête
         $accessToken = $request->query('access_token');
         $clientId = $request->query('client_id');
-    
+        $apiId =$request->query('api_id');
         // Vérifier si les paramètres sont présents
-        if (!$accessToken || !$clientId) {
+        if (!$accessToken || !$clientId  || !$apiId) {
             return response()->json(['error' => 'Access Token and Client ID are required'], 400);
         }
     
         // Récupérer le client dans la base de données
         $client = Clients::where('instagram_id', $clientId)->first();
-    
+        $api = API::find($apiId);
+        if (!$api) {
+            return response()->json(['error' => 'API not found'], 404);
+        }
         if (!$client) {
             return response()->json(['error' => 'Client not found'], 404);
         }
@@ -42,7 +48,7 @@ class PostsController extends Controller
             $transformedData = $this->transformEngagementData($rawData);
     
             // Stocker les posts transformés dans la base de données
-            $this->storePostsInDatabase($clientId, $transformedData);
+            $this->storePostsInDatabase($clientId, $transformedData,$api->id);
     
             // Retourner les données transformées
             return response()->json($transformedData);
@@ -69,6 +75,7 @@ class PostsController extends Controller
                     }
 
                     $transformedData[] = [
+                        
                         'post_id' => $post['id'],
                         'caption' => isset($post['caption']) ? $post['caption'] : '',
                         'like_count' => isset($post['like_count']) ? $post['like_count'] : 0,
@@ -88,7 +95,7 @@ class PostsController extends Controller
         
     
   
-        public function storePostsInDatabase($clientId, $postsData)
+        public function storePostsInDatabase($clientId, $postsData,$apiId)
         {
             $client = Clients::where('instagram_id', $clientId)->first();
 
@@ -105,7 +112,9 @@ if (!$client) {
                 if (!$existingPost) {
                 
                     posts::create([
-                        'client_id' => $client->id,  // Assure-toi que l'ID du client est bien fourni
+                      
+                        'client_id' => $client->id,
+                        'api_id' => $apiId,  // Assure-toi que l'ID du client est bien fourni
                         'post_id' => $post['post_id'],
                         'caption' => $post['caption'],
                         'like_count' => $post['like_count'],
@@ -142,7 +151,8 @@ if (!$client) {
 
     // Calculer le taux d'engagement global
     $engagementGlobal = (($totalLikes + $totalComments + $totalShares) / $totalImpressions) * 100;
-
+    //save the kpi on real time 
+     $this->saveKpi($client->id,'Engagement Rate',$engagementGlobal, '↑', 'high');
     // Retourner la réponse JSON avec le taux d'engagement global
     return response()->json(['engagement_global' => $engagementGlobal]);
 }
@@ -179,15 +189,32 @@ public function getEngagementPerPost($clientId)
             'timestamp' => $post->timestamp,
         ];
     }
-
+   
     return response()->json($engagementPerPost);
 }
 
         
         
+public function saveKpi($clientId, $name, $value, $trend, $status)
+{
+    // Créer un nouvel enregistrement pour chaque KPI
+    $kpi = new KPIs();
+    $kpi->client_id = $clientId; // Associer ce KPI au client
+    $kpi->name = $name;
+    $kpi->value = $value;
+    $kpi->trend = $trend;
+    $kpi->status = $status;
+  
+    $kpi->save();
+
+    return $kpi;
+}   
         
-        
-        
+public function showAllKpis()
+{
+    return KPIs::all();
+}
+   
         
         }
         

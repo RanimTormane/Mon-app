@@ -70,7 +70,7 @@ Route::controller(KPIsController::class)
     ->prefix('KPIs')
     
     ->group(function(){
-        Route::get('/create','create'); 
+        Route::get('/','index');
         Route::post('/store','store');
        
     });
