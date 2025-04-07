@@ -107,14 +107,16 @@ class ClientsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Clients $clients)
-    {
-       $kpi->delete();
-       if (request()->wantsJson()) {
-        return response()->json([
-            'message' => 'API deleted successfully!'
-        ]);
+
+    public function destroy(Clients $client)
+    {  
+        
+       $client->delete();
+      
+       return response()->json([
+        'message' => 'Client deleted successfully!'
+    ], 200);
     }
     }
   
-    }
+    

@@ -214,9 +214,136 @@ public function showAllKpis()
 {
     return KPIs::all();
 }
-   
-        
+    public function getInteractions($clientId){
+      $client = Clients::find($clientId);
+      if(!$client){
+        return response()->json(['error'=>'Client not found'],404);//404 error Not Found
+      }
+
+
+      // get client posts
+      $posts=posts::where('client_id',$client->id)->get();
+
+
+    // Initialiser les compteurs
+    $totalLikes = 0;
+    $totalComments = 0;
+    $totalShares = 0;
+    $totalImpressions = 0;
+    foreach ($posts as $post) {
+        $totalLikes += $post->like_count;
+        $totalComments += $post->comments_count;
+        $totalShares += $post->shares_count;
+        $totalImpressions += $post->impressions;
+    }
+    return response()->json([
+        'total_likes' => $totalLikes,
+        'total_comments' => $totalComments,
+        'total_shares' => $totalShares,
+        'total_impressions' => $totalImpressions,
+    ]);
+    }
+
+    public function getEngagementEvolution($clientId){
+        $client= Clients::find($clientId);
+        if(!$client){
+            return response()->json(['error'=>'Client not found'],404);
         }
+        $posts=posts::where('client_id',$client->id)->get();
+        $monthlyData = [
+            'January' => ['likes' => 0, 'comments' => 0, 'shares' => 0, 'impressions' => 0],
+            'February' => ['likes' => 0, 'comments' => 0, 'shares' => 0, 'impressions' => 0],
+            'March' => ['likes' => 0, 'comments' => 0, 'shares' => 0, 'impressions' => 0],
+            'April' => ['likes' => 0, 'comments' => 0, 'shares' => 0, 'impressions' => 0],
+            'May' => ['likes' => 0, 'comments' => 0, 'shares' => 0, 'impressions' => 0],
+            'June' => ['likes' => 0, 'comments' => 0, 'shares' => 0, 'impressions' => 0],
+            'July' => ['likes' => 0, 'comments' => 0, 'shares' => 0, 'impressions' => 0],
+            'August' => ['likes' => 0, 'comments' => 0, 'shares' => 0, 'impressions' => 0],
+            'September' => ['likes' => 0, 'comments' => 0, 'shares' => 0, 'impressions' => 0],
+            'October' => ['likes' => 0, 'comments' => 0, 'shares' => 0, 'impressions' => 0],
+            'November' => ['likes' => 0, 'comments' => 0, 'shares' => 0, 'impressions' => 0],
+            'December' => ['likes' => 0, 'comments' => 0, 'shares' => 0, 'impressions' => 0],
+        ];
+    
+        // Parcourir les posts pour ajouter les engagements au bon mois
+        foreach ($posts as $post) {
+            $month = $post->created_at->format('F'); // Extrait le mois sous forme de nom : 'January', 'February', etc.
+            
+            // Vérifier si le mois est valide (au cas où il y aurait une erreur de données)
+            if (isset($monthlyData[$month])) {
+                $monthlyData[$month]['likes'] += $post->like_count;
+                $monthlyData[$month]['comments'] += $post->comments_count;
+                $monthlyData[$month]['shares'] += $post->shares_count;
+                $monthlyData[$month]['impressions'] += $post->impressions;
+            }
+        }
+    
+        return response()->json($monthlyData);
+    }
+
+    public function getEngagementByUser($clientId){
+        $client= Clients::find($clientId);
+        if(!$client){
+            return response()->json(['error'=>'Client not found'],404);
+        }
+        $posts=posts::where('client_id',$client->id)->get();
+ $userEngagementData = [];
+
+    foreach ($posts as $post) {
+        // Calculer l'engagement de chaque post
+        $engagement = $post->like_count + $post->comments_count + $post->shares_count;
+
+        // Si l'utilisateur n'existe pas encore dans le tableau, l'ajouter
+        if (!isset($userEngagementData[$post->client_id])) {
+            $userEngagementData[$post->client_id] = [
+                'total_likes' => 0,
+                'total_comments' => 0,
+                'total_shares' => 0,
+                'total_impressions' => 0,
+                'total_engagement' => 0,
+            ];
+        }
+
+        // Ajouter les données d'engagement pour chaque utilisateur
+        $userEngagementData[$post->client_id]['total_likes'] += $post->like_count;
+        $userEngagementData[$post->client_id]['total_comments'] += $post->comments_count;
+        $userEngagementData[$post->client_id]['total_shares'] += $post->shares_count;
+        $userEngagementData[$post->client_id]['total_impressions'] += $post->impressions;
+        $userEngagementData[$post->client_id]['total_engagement'] += $engagement;
+    }
+
+    // Calculer les KPIs par utilisateur
+    $engagementKpis = [];
+    foreach ($userEngagementData as $userId => $data) {
+        // Vérifier qu'il y a des impressions pour éviter la division par zéro
+        if ($data['total_impressions'] > 0) {
+            $engagementRate = (($data['total_engagement'] / $data['total_impressions']) * 100);
+        } else {
+            $engagementRate = 0;
+        }
+
+        // Ajouter les KPI à la réponse
+        $engagementKpis[] = [
+            'user_id' => $userId,
+            'total_likes' => $data['total_likes'],
+            'total_comments' => $data['total_comments'],
+            'total_shares' => $data['total_shares'],
+            'total_impressions' => $data['total_impressions'],
+            'total_engagement' => $data['total_engagement'],
+            'engagement_rate' => round($engagementRate, 2),
+        ];
+    }
+
+    return response()->json($engagementKpis);
+}
+    
+        }
+
+
+
+
+
+
         
 
 
