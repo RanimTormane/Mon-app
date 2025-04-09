@@ -49,7 +49,13 @@ class ClientsController extends Controller
 
     if ($response->successful()) {
         $data = $response->json();
-
+    // Liste des dashboards à ajouter
+    $dashboards = [
+        'Marketing statistics',
+        'Social Media Statistics',
+        'Traffic Web Analytics',
+        'Financial Analytics'
+    ];
        
         // Utilisation de updateOrCreate pour insérer ou mettre à jour un client
         $client = Clients::updateOrCreate(
@@ -58,7 +64,7 @@ class ClientsController extends Controller
                 'username' => $data['username'],
                 'profile_picture_url' => $data['profile_picture_url'] ?? null,
                 'action'=>null,
-                'dashboards' => null,
+               'dashboards' => json_encode($dashboards),
             ]
         );
         
@@ -82,10 +88,22 @@ class ClientsController extends Controller
     /**
      * Display the specified resource.
      */
-   public function show()
+   public function show($id)
 {
-   
+    // Récupérer le client par son ID
+    $client = Clients::find($id);
+
+    if (!$client) {
+        return response()->json(['error' => 'Client non trouvé'], 404);
+    }
+
+    // Retourner les données du client, y compris les dashboards
+    return response()->json([
+        'client' => $client,
+        'dashboards' => json_decode($client->dashboards) // Si c'est une chaîne JSON
+    ]);
 }
+
 
 
     /**
@@ -117,6 +135,8 @@ class ClientsController extends Controller
         'message' => 'Client deleted successfully!'
     ], 200);
     }
+
+    
     }
   
     

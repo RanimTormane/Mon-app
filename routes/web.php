@@ -68,12 +68,10 @@ Route::get('/show-likes', function () {
 });
 Route::controller(KPIsController::class)
     ->prefix('KPIs')
-    
     ->group(function(){
         Route::get('/','index');
         Route::post('/store','store');
-       
-    });
+    });  // <--- Ajout
 
 
     Route::get('/auth/instagram', [InstagramAuthController::class, 'redirectToInstagram']);

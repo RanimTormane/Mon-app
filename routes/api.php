@@ -41,15 +41,14 @@ Route::get('/dashboard', [DashboardController::class, 'index']);  // Return la l
 Route::get('/dashboard/client/{id}', [DashboardController::class, 'showClientDashboard']);  // Return un client spécifique en JSON
 
 Route::post('/export/dashboard/pdf', [ExportController::class, 'exportDashboardPdf']);
-Route::post('/export/dashboard/csv', [ExportController::class, 'exportDashboardCsv']);
+Route::post('/export-chart-data', [ExportController::class, 'exportDashboardCsv']);
 Route::get('/auth/instagram/callback', [InstagramAuthController::class, 'instagramCallback']);
 
 
 Route::post('/store-instagram-client', [ClientsController::class, 'store']);
 Route::get('/clients', [ClientsController::class, 'index']);
 Route::delete('/clients/delete/{client}',[ClientsController::class, 'destroy']);
-
-
+Route::get('client-dashboard/{id}', [ClientsController::class, 'show']);
 
 
 Route::get('/instagram/engagement', [PostsController::class, 'getEngagementData']);
