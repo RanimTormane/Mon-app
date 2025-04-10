@@ -18,7 +18,7 @@ return new class extends Migration
            
             $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
 
-            $table->unsignedBigInteger('api_id')->nullable();
+           $table->unsignedBigInteger('api_id')->nullable();
 
             $table->foreign('api_id')->references('id')->on('api')->onDelete('cascade');
             $table->string('post_id');

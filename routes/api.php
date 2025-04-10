@@ -43,12 +43,16 @@ Route::get('/dashboard/client/{id}', [DashboardController::class, 'showClientDas
 Route::post('/export/dashboard/pdf', [ExportController::class, 'exportDashboardPdf']);
 Route::post('/export-chart-data', [ExportController::class, 'exportDashboardCsv']);
 Route::get('/auth/instagram/callback', [InstagramAuthController::class, 'instagramCallback']);
+Route::get('/auth/instagram', [InstagramAuthController::class, 'redirectToInstagram']);
 
 
 Route::post('/store-instagram-client', [ClientsController::class, 'store']);
 Route::get('/clients', [ClientsController::class, 'index']);
 Route::delete('/clients/delete/{client}',[ClientsController::class, 'destroy']);
 Route::get('client-dashboard/{id}', [ClientsController::class, 'show']);
+
+
+Route::get('/clients/{clientId}/dashboard/{slug}', [ClientsController::class, 'getDashboard']);
 
 
 Route::get('/instagram/engagement', [PostsController::class, 'getEngagementData']);

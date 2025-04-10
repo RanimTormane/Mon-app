@@ -13,7 +13,6 @@ class Clients extends Model
         'instagram_id',
         'username',
         'profile_picture_url',
-        'action',
         'dashboards', 
     ];
 

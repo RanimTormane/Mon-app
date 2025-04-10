@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('instagram_id')->unique();
             $table->string('username');
             $table->text('profile_picture_url')->nullable();
-            $table->string('action')->nullable(); 
+           
             $table->text('dashboards')->nullable();
            
             $table->timestamps();

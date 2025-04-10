@@ -63,7 +63,7 @@ class ClientsController extends Controller
             [
                 'username' => $data['username'],
                 'profile_picture_url' => $data['profile_picture_url'] ?? null,
-                'action'=>null,
+              
                'dashboards' => json_encode($dashboards),
             ]
         );
