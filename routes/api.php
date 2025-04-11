@@ -40,7 +40,8 @@ Route::post('/add-kpi', [KPIsController::class, 'store']);
 Route::get('/dashboard', [DashboardController::class, 'index']);  // Return la list des clients en JSON
 Route::get('/dashboard/client/{id}', [DashboardController::class, 'showClientDashboard']);  // Return un client spécifique en JSON
 
-Route::post('/export/dashboard/pdf', [ExportController::class, 'exportDashboardPdf']);
+Route::post('/generate-pdf', [ExportController::class, 'generatePdf']);
+
 Route::post('/export-chart-data', [ExportController::class, 'exportDashboardCsv']);
 Route::get('/auth/instagram/callback', [InstagramAuthController::class, 'instagramCallback']);
 Route::get('/auth/instagram', [InstagramAuthController::class, 'redirectToInstagram']);

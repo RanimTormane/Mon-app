@@ -1,10 +1,15 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Log;
+
+use League\Csv\Writer;
+use Barryvdh\DomPDF\Facade as PDF;
+
 
 use Illuminate\Http\Request;
-use League\Csv\Writer;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class ExportController extends Controller
 {
@@ -29,4 +34,34 @@ class ExportController extends Controller
             'Expires' => '0',
         ]);
     }
-}
+  
+   // Dans votre contrôleur Laravel
+public function generatePdf(Request $request)
+{
+    $validated = $request->validate([
+        'html' => 'required|string',
+        'charts' => 'required|array',
+        'charts.*.id' => 'required|string',
+        'charts.*.data' => 'required|string', // base64 image
+        'charts.*.width' => 'sometimes|integer',
+        'charts.*.height' => 'sometimes|integer',
+    ]);
+
+    // Remplacer les placeholders dans le HTML par les images
+    $html = $validated['html'];
+    foreach ($validated['charts'] as $chart) {
+        $imgTag = sprintf(
+            '<img src="%s" width="%d" height="%d" />',
+            $chart['data'],
+            $chart['width'] ?? 600,
+            $chart['height'] ?? 400
+        );
+        $html = str_replace($chart['id'], $imgTag, $html);
+    }
+
+    // Générer le PDF
+    $pdf = PDF::loadHTML($html);
+    return response($pdf->output(), 200, [
+        'Content-Type' => 'application/pdf',
+    ]);
+}}

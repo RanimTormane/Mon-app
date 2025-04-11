@@ -111,5 +111,8 @@ return [
     */
 
     'password_timeout' => 10800,
+    
+    'Pdf' => Barryvdh\DomPDF\Facade\Pdf::class,
+
 
 ];
