@@ -35,33 +35,58 @@ class ExportController extends Controller
         ]);
     }
   
-   // Dans votre contrôleur Laravel
-public function generatePdf(Request $request)
+    public function generatePdf(Request $request)
 {
-    $validated = $request->validate([
-        'html' => 'required|string',
-        'charts' => 'required|array',
-        'charts.*.id' => 'required|string',
-        'charts.*.data' => 'required|string', // base64 image
-        'charts.*.width' => 'sometimes|integer',
-        'charts.*.height' => 'sometimes|integer',
-    ]);
+    try {
+        // Valider les données du formulaire
+        $validated = $request->validate([
+            'html' => 'required|string',
+            'charts' => 'required|array',
+            'charts.*.id' => 'required|string',
+            'charts.*.data' => 'required|string', // base64 image
+            'charts.*.width' => 'sometimes|integer',
+            'charts.*.height' => 'sometimes|integer',
+        ]);
 
-    // Remplacer les placeholders dans le HTML par les images
-    $html = $validated['html'];
-    foreach ($validated['charts'] as $chart) {
-        $imgTag = sprintf(
-            '<img src="%s" width="%d" height="%d" />',
-            $chart['data'],
-            $chart['width'] ?? 600,
-            $chart['height'] ?? 400
-        );
-        $html = str_replace($chart['id'], $imgTag, $html);
+        // Log des informations une fois que la validation est réussie
+        Log::info('HTML reçu : ' . $validated['html']);
+        Log::info('Charts reçus : ' . print_r($validated['charts'], true));
+
+        // Remplacer les placeholders dans le HTML par les images
+        $html = $validated['html'];
+        foreach ($validated['charts'] as $chart) {
+            $imgTag = sprintf(
+                '<img src="%s" width="%d" height="%d" />',
+                $chart['data'],
+                $chart['width'] ?? 600,
+                $chart['height'] ?? 400
+            );
+            // Pour éviter une mauvaise substitution
+            $html = str_replace($chart['id'], $imgTag, $html);
+        }
+
+        // Générer le PDF
+        $pdf = Pdf::loadHTML($html);
+
+        // Retourner le PDF généré
+        return response($pdf->output(), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="dashboard.pdf"');
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        // Si la validation échoue, retourne une erreur claire
+        return response()->json([
+            'error' => 'Validation échouée',
+            'messages' => $e->errors(),
+        ], 422);
+    } catch (\Exception $e) {
+        // Log erreur côté serveur
+        Log::error('Erreur génération PDF: ' . $e->getMessage());
+
+        // Retourner une réponse avec une erreur serveur
+        return response()->json([
+            'error' => 'Erreur serveur',
+            'message' => $e->getMessage(),
+        ], 500);
     }
-
-    // Générer le PDF
-    $pdf = PDF::loadHTML($html);
-    return response($pdf->output(), 200, [
-        'Content-Type' => 'application/pdf',
-    ]);
-}}
+}
+}

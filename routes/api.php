@@ -10,6 +10,7 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\InstagramAuthController;
 use App\Http\Controllers\ClientsController;
 use App\Http\Controllers\PostsController;
+use App\Http\Controllers\UserController;
 
 
 /*
@@ -55,7 +56,7 @@ Route::get('client-dashboard/{id}', [ClientsController::class, 'show']);
 
 Route::get('/clients/{clientId}/dashboard/{slug}', [ClientsController::class, 'getDashboard']);
 
-
+//KPI
 Route::get('/instagram/engagement', [PostsController::class, 'getEngagementData']);
 Route::get('/test-engagement', [PostsController::class, 'transformEngagementData']);
 
@@ -67,3 +68,28 @@ Route::get('/kpis', [PostsController::class, 'showAllKpis']);
 Route::get('/interactions/{clientId}',[PostsController::class,'getInteractions']);
 Route::get('/evolution/{clientId}',[PostsController::class,'getEngagementEvolution']);
 Route::get('/engagementByUser/{clientId}',[PostsController::class,'getEngagementByUser']);
+Route::post('/posts-filter',[PostsController::class,'filterPosts']);
+
+
+
+//user
+Route::apiResource('/users',UserController::class);
+Route::post('/add-user', [UserController::class, 'store']);
+Route::put('/edit-user/{user}',[UserController::class , 'update']);
+Route::get('/show-user/{user}', [UserController::class, 'show']);
+Route::delete('/delete-user/{user}',[UserController::class,'destroy']);
+
+
+Route::group([
+
+    'middleware' => 'api',
+
+
+], function ($router) {
+
+    Route::post('login', 'AuthController@login');
+    Route::post('logout', 'AuthController@logout');
+    Route::post('refresh', 'AuthController@refresh');
+    Route::post('me', 'AuthController@me');
+
+});

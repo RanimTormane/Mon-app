@@ -16,7 +16,8 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "league/csv": "^9.23",
-        "realrashid/sweet-alert": "*"
+        "realrashid/sweet-alert": "*",
+        "php-open-source-saver/jwt-auth": "^2.8"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",

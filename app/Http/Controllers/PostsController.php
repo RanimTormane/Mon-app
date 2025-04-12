@@ -336,7 +336,36 @@ public function showAllKpis()
 
     return response()->json($engagementKpis);
 }
-    
+
+public function filterPosts(Request $request)
+{
+    $request->validate([
+        'start_date' => 'nullable|date',
+        'end_date' => 'nullable|date|after_or_equal:start_date',
+        'min_likes' => 'nullable|integer|min:0',
+        'caption' => 'nullable|string|max:255'
+    ]);
+
+    $query = posts::query();
+
+    if ($request->filled('start_date')) {
+        $query->whereDate('timestamp', '>=', $request->start_date);
+    }
+
+    if ($request->filled('end_date')) {
+        $query->whereDate('timestamp', '<=', $request->end_date);//ignore l'heure, et ne prend en compte que la date
+    }
+
+    if ($request->filled('min_likes')) {
+        $query->where('like_count', '>=', $request->min_likes);
+    }
+
+    if ($request->filled('caption')) {
+        $query->where('caption', 'like', '%' . $request->caption . '%');
+    }
+
+    return $query->orderBy('timestamp', 'desc')->get();
+}
         }
 
 
