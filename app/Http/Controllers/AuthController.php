@@ -1,10 +1,10 @@
 <?php
-
 namespace App\Http\Controllers;
 
+use App\Http\Requests\signupRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
-
+use App\Models\User;
 class AuthController extends Controller
 {
     /**
@@ -14,7 +14,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login','signup']]);
     }
 
     /**
@@ -28,12 +28,18 @@ class AuthController extends Controller
 
         if (! $token = auth()->attempt($credentials))//if these credentials will not found on the data base il return unauthorized
          {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['error' => 'Email or Password dosen\'t exist'], 401);
         }
 
         return $this->respondWithToken($token);//or return a token of auth
     }
 
+
+    public function signup(signupRequest $request)
+     {
+        $user = User::create($request->all());
+        return $this->login($request);
+     }
     /**
      * Get the authenticated User.
      *
