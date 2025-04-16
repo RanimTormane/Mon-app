@@ -10,14 +10,15 @@
     "require": {
         "php": "^8.3",
         "barryvdh/laravel-dompdf": "^3.1",
+        "google/analytics-data": "^0.22.2",
         "google/apiclient": "2.13",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "league/csv": "^9.23",
-        "realrashid/sweet-alert": "*",
-        "php-open-source-saver/jwt-auth": "^2.8"
+        "php-open-source-saver/jwt-auth": "^2.8",
+        "realrashid/sweet-alert": "*"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.15",

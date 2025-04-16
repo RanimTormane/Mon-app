@@ -12,6 +12,8 @@ use App\Http\Controllers\ClientsController;
 use App\Http\Controllers\PostsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AnalyticsController;
 
 
 
@@ -94,5 +96,15 @@ Route::group([
     Route::post('logout', [AuthController::class,'logout']);
     Route::post('refresh', [AuthController::class,'refresh']);
     Route::post('me', [AuthController::class,'me']);
+    Route::post('/activate-user/{id}', [AdminController::class, 'activateUser']);
+    Route::middleware('auth:sanctum')->get('/users-pending', [UserController::class, 'getPendingUsers']);
 
+    
+    
 });
+
+
+Route::middleware('auth:api')->group(function () {
+    Route::get('/analytics/report', [AnalyticsController::class, 'getReport']);
+});
+

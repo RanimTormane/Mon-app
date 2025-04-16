@@ -1,63 +1,78 @@
 <?php
-
+// app/Services/GoogleAnalyticsService.php
 namespace App\Services;
 
-use Google_Client;
-use Google_Service_AnalyticsData;
-use Google_Service_AnalyticsData_RunReportRequest;
-use Google_Service_AnalyticsData_Metric;
-use Google_Service_AnalyticsData_Dimension;
-use Google_Service_AnalyticsData_DateRange;
+use Google\Analytics\Data\V1beta\Client\BetaAnalyticsDataClient;
+use Google\Analytics\Data\V1beta\DateRange;
+use Google\Analytics\Data\V1beta\Dimension;
+use Google\Analytics\Data\V1beta\Metric;
+use Illuminate\Support\Facades\Log;
 
 class GoogleAnalyticsService
 {
     protected $client;
+    protected $propertyId;
 
     public function __construct()
     {
-        $this->client = new Google_Client();
-        $this->client->setAuthConfig(storage_path('app/google/local-bebop-450021-v2-640a0e13f44b.json'));
-        $this->client->addScope(Google_Service_AnalyticsData::ANALYTICS_READONLY);
+        try {
+            $credentialsPath = env('GOOGLE_ANALYTICS_CREDENTIALS', 'storage/app/analytics/service-account-credentials.json');
+            $absolutePath = base_path($credentialsPath);
+            Log::info('Attempting to load keyfile: ' . $absolutePath);
+            if (!file_exists($absolutePath)) {
+                throw new \Exception("Could not find keyfile: $absolutePath (resolved from $credentialsPath)");
+            }
+            if (!is_readable($absolutePath)) {
+                throw new \Exception("Keyfile not readable: $absolutePath");
+            }
+            $this->propertyId = env('GOOGLE_ANALYTICS_PROPERTY_ID');
+            if (!$this->propertyId) {
+                throw new \Exception("Google Analytics Property ID not set");
+            }
+            $this->client = new BetaAnalyticsDataClient([
+                'credentials' => $absolutePath,
+            ]);
+            Log::info('Google Analytics client initialized successfully');
+        } catch (\Exception $e) {
+            Log::error('GoogleAnalyticsService error: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
-    public function getAnalyticsData($propertyId, $startDate, $endDate)
+    public function getReport($startDate = '7daysAgo', $endDate = 'today')
     {
         try {
-            // Create an object for the request of api 
-            $analyticsData = new Google_Service_AnalyticsData($this->client);
-            $request = new Google_Service_AnalyticsData_RunReportRequest();
-
-            // define the plage of date
-            $dateRange = new Google_Service_AnalyticsData_DateRange();
-            $dateRange->setStartDate($startDate);  
-            $dateRange->setEndDate($endDate);  
-
-            // add the plage of date on the request 
-            $request->setDateRanges([$dateRange]);
-
-            // Define the dimensions (exp : pays)
-            $request->setDimensions([new Google_Service_AnalyticsData_Dimension(['name' => 'country'])]);
-
-            // Define the metrics  (exp : sessions, newUsers, screenPageViews)
-            $request->setMetrics([
-                new Google_Service_AnalyticsData_Metric(['name' => 'sessions']),
-                new Google_Service_AnalyticsData_Metric(['name' => 'newUsers']),
-                new Google_Service_AnalyticsData_Metric(['name' => 'screenPageViews']), 
+            $response = $this->client->runReport([
+                'property' => "properties/{$this->propertyId}",
+                'dateRanges' => [
+                    new DateRange([
+                        'start_date' => $startDate,
+                        'end_date' => $endDate,
+                    ]),
+                ],
+                'dimensions' => [
+                    new Dimension(['name' => 'date']),
+                    new Dimension(['name' => 'pagePath']),
+                ],
+                'metrics' => [
+                    new Metric(['name' => 'screenPageViews']),
+                    new Metric(['name' => 'activeUsers']),
+                ],
             ]);
 
-            // Effect the request 
-
-            $results = $analyticsData->properties->runReport("properties/$propertyId", $request);
-
-            if (count($results->getRows()) === 0) {
-                return [];  // return empty table 
+            $result = [];
+            foreach ($response->getRows() as $row) {
+                $result[] = [
+                    'date' => $row->getDimensionValues()[0]->getValue(),
+                    'pagePath' => $row->getDimensionValues()[1]->getValue(),
+                    'pageViews' => $row->getMetricValues()[0]->getValue(),
+                    'activeUsers' => $row->getMetricValues()[1]->getValue(),
+                ];
             }
-    
-            return $results->getRows();
+            return $result;
         } catch (\Exception $e) {
-        
-            return [];
+            Log::error('Google Analytics API error: ' . $e->getMessage());
+            throw new \Exception('Failed to fetch analytics data: ' . $e->getMessage());
         }
     }
 }
-

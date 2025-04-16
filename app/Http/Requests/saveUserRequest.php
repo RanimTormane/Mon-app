@@ -25,7 +25,7 @@ class saveUserRequest extends FormRequest
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
-            'role' => 'required|string|in:Marketing manager,Marketing assistant',
+            'role' => 'required|string|in:Admin,Marketing manager,Marketing assistant',
         ];
     }
 
@@ -39,7 +39,7 @@ class saveUserRequest extends FormRequest
             'password.required' => 'The password is required.',
             'password.min' => 'The password must be at least 6 characters long.',
             'role.required' => 'The role is required.',
-            'role.in' => 'The role must be either "Marketing manager" or "Marketing assistant".',
+            'role.in' => 'The role must be either "Admin" or "Marketing manager" or "Marketing assistant".',
         ];
 }
 }
