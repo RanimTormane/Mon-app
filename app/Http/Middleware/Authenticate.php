@@ -19,16 +19,28 @@ class Authenticate extends Middleware
         return $request->expectsJson() ? null : route('login');
     }
 
-    // Middleware pour vérifier le rôle
+
 public function handle($request, Closure $next, ...$guards)
-{  Log::info('Authentication failed', ['email' => $request->email]);
-    $user = JWTAuth::parseToken()->authenticate();
+{
+    try {
+        Log::info('Trying to authenticate user with JWT token');
 
-    if ($user->role !== 'Admin') {
-        return response()->json(['error' => 'Access denied'], 403);
+        $user = JWTAuth::parseToken()->authenticate();
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        if ($user->role !== 'Admin') {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        return $next($request);
+
+    } catch (JWTException $e) {
+        Log::error('JWT Exception: ' . $e->getMessage());
+        return response()->json(['error' => 'Token not provided or invalid'], 401);
     }
-
-    return $next($request);
 }
 
 }

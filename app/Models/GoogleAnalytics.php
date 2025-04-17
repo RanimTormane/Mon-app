@@ -10,5 +10,14 @@ class GoogleAnalytics extends Model
     use HasFactory;
     protected $table='google_analytics';
     //make sure that the fields are stored 
-    protected $fillable=['date',',sessions','pageviews','users','avg_session_duration','bounce_rate','page','pageviews_per_session','new_visitors','returning_visitors','user_type'];
+    protected $fillable = [
+        'visitor_id',
+        'session',
+        'visit_date',
+        'campaign_name',
+        'traffic_source',
+        'lead_type',
+        'is_converted',
+        'lead_id',
+    ];
 }

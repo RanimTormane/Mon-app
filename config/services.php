@@ -36,5 +36,10 @@ return [
         'view_id' => '476634976', // Google Analytics VIEW ID
         
     ],//store extern service configuration 
+    'google_analytics' => [
+    'property_id' => env('GOOGLE_ANALYTICS_PROPERTY_ID'),
+    'credentials_path' => env('GOOGLE_ANALYTICS_CREDENTIALS', 'storage/app/analytics/service-account-credentials.json'),
+],
+
 
 ];

@@ -13,18 +13,19 @@ return new class extends Migration
     {
         Schema::create('google_analytics', function (Blueprint $table) {
             $table->id();
-            $table->date('date');
-            $table->integer('sessions');//actions made by users on website 
-            $table->integer('pageviews');
-            $table->integer('users');
-            $table->float('avg_session_duration');
-            $table->float('bounce_rate');
-            $table->float('pageviews_per_session');  
-            $table->integer('new_visitors');  
-            $table->integer('returning_visitors');  
-            $table->string('user_type');  // (new or recurring )
+            $table->uuid('visitor_id'); // UUID for visitor
+            $table->uuid('session'); // UUID for session
+            $table->dateTime('visit_date'); // Date and time of visit
+            $table->enum('campaign_name', ['Google Ads', 'Facebook Ads', 'Email Marketing', 'LinkedIn Ads', 'TikTok Ads']); // Campaign
+            $table->enum('traffic_source', ['SEO', 'SEA', 'Social Media', 'Direct', 'Referral']); // Traffic source
+            $table->enum('lead_type', ['Froid', 'Tiède', 'Chaud']); // Lead type
+            $table->boolean('is_converted')->default(false); // Conversion status
+            $table->uuid('lead_id')->nullable(); // Lead ID
             $table->timestamps();
         });
+        
+  
+        
     }
 
     /**

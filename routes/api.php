@@ -14,6 +14,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\GoogleAnalyticsController;
 
 
 
@@ -104,7 +105,12 @@ Route::group([
 });
 
 
-Route::middleware('auth:api')->group(function () {
-    Route::get('/analytics/report', [AnalyticsController::class, 'getReport']);
-});
+Route::get('/kpi-data', [GoogleAnalyticsController::class, 'etlProcess']);
 
+Route::get('/conversion-Rate', [GoogleAnalyticsController::class, 'getConversionGlobalRate']);
+
+
+Route::get('/conversion-campagnes', [GoogleAnalyticsController::class, 'conversionParCampagne']);
+Route::get('/conversions-by-traffic', [GoogleAnalyticsController::class, 'getConversionsByTrafficSource']);
+Route::get('/conversions-by-lead-type', [GoogleAnalyticsController::class, 'getConversionsByLeadType']);
+Route::get('/leads-by-visit-date', [GoogleAnalyticsController::class, 'getLeadsByVisitDate(']);
