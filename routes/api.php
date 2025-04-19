@@ -15,7 +15,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\GoogleAnalyticsController;
-
+use App\Http\Controllers\GoogleAdsController;
 
 
 /*
@@ -104,13 +104,22 @@ Route::group([
     
 });
 
-
+//google_analytics
 Route::get('/kpi-data', [GoogleAnalyticsController::class, 'etlProcess']);
-
 Route::get('/conversion-Rate', [GoogleAnalyticsController::class, 'getConversionGlobalRate']);
-
-
 Route::get('/conversion-campagnes', [GoogleAnalyticsController::class, 'conversionParCampagne']);
 Route::get('/conversions-by-traffic', [GoogleAnalyticsController::class, 'getConversionsByTrafficSource']);
 Route::get('/conversions-by-lead-type', [GoogleAnalyticsController::class, 'getConversionsByLeadType']);
-Route::get('/leads-by-visit-date', [GoogleAnalyticsController::class, 'getLeadsByVisitDate(']);
+Route::get('/kpi/lead-score-evolution', [GoogleAnalyticsController::class, 'getLeadScoreEvolution']);
+
+
+//google_ads
+Route::get('/Ads-data', [GoogleAdsController::class, 'etlProcessAds']);
+Route::get('/CAC-Rate', [GoogleAdsController::class, 'getGlobalCAC']);
+Route::get('/cac-by-campaign', [GoogleAdsController::class, 'getCACByCampaign']);
+Route::get('/cac-by-month', [GoogleAdsController::class, 'getCACByMonth']);
+Route::get('/cost-by-leads', [GoogleAdsController::class, 'getCostByLeads']);
+Route::get('/ROAS', [GoogleAdsController::class, 'getGlobalROAS']);
+Route::get('/ROAS-by-product', [GoogleAdsController::class, 'getROASByProduct']);
+Route::get('/ROAS-by-campaign', [GoogleAdsController::class, 'getROASByCampaign']);
+Route::get('/profit-by-campain', [GoogleAdsController::class, 'getProfitabilityByCampaign']);
