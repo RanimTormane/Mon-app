@@ -4,62 +4,123 @@ namespace App\Http\Controllers;
 
 use App\Models\trafic_stats;
 use Illuminate\Http\Request;
-
+use Carbon\Carbon;
 class TraficStatsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function extractTraficData()
     {
-        //
+        $json=file_get_contents(storage_path('app/analytics/trafic_stats.json'));
+        $data=json_decode($json,true);
+        return $data;
+       
     }
+    public function transformTraficData($data){
+        foreach ($data as $entry) {
+            trafic_stats::create([
+                'date' => Carbon::parse($entry['date'])->format('Y-m-d'),
+                'visiteurs_uniques' => $entry['visiteurs_uniques'],
+                'sessions' => $entry['sessions'],
+                'temps_total_site' => $entry['temps_total_site'],
+                'bounce_rate' => $entry['bounce_rate'],
+                'pages_vues_totales' => $entry['pages_vues_totales'],
+                'nouveaux_visiteurs' => $entry['nouveaux_visiteurs'],
+                'visiteurs_recurrents' => $entry['visiteurs_recurrents'],]);
+    }}
+    public function loadTraficData($data){
+        //load
+        if (is_array($data) || is_object($data)) {
+        foreach ($data as $entry) {
+            trafic_stats::create([
+                'date' => $entry['date'],
+                'visiteurs_uniques' => $entry['visiteurs_uniques'],
+                'sessions' => $entry['sessions'],
+                'temps_total_site' => $entry['temps_total_site'],
+                'bounce_rate' => $entry['bounce_rate'],
+                'pages_vues_totales' => $entry['pages_vues_totales'],
+                'nouveaux_visiteurs' => $entry['nouveaux_visiteurs'],
+                'visiteurs_recurrents' => $entry['visiteurs_recurrents']
+            ]);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+        }
+    }}
+    public function etlProcessTrafic()
     {
-        //
-    }
+        $data = $this->extractTraficData();
+    
+        $transformed = $this->transformTraficData($data);
+        $this->loadTraficData($transformed);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
+        return response()->json(['message' => 'ETL terminé avec succès 🚀']);
     }
+    public function getVisiterByMonth(){
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(trafic_stats $trafic_stats)
-    {
-        //
+        $data = \DB::table('trafic_stats')
+        ->select(
+            \DB::raw('DATE_FORMAT(date, "%Y-%m") as month'),
+            \DB::raw('SUM(visiteurs_uniques) as total_visiteurs')
+        )
+        ->groupBy(\DB::raw('DATE_FORMAT(date, "%Y-%m")'))
+        ->orderBy('month')
+       
+        ->get();
+        
+    
+        return $data;
+       
     }
+    public function getSessionDurationByMonth() {
+        $data = \DB::table('trafic_stats')
+            ->select(
+                \DB::raw('DATE_FORMAT(date, "%Y-%m") as month'),
+                \DB::raw('ROUND(AVG(sessions), 2) as avg_session_duration') // On utilise session ici
+            )
+            ->groupBy(\DB::raw('DATE_FORMAT(date, "%Y-%m")'))
+            ->orderBy('month')
+            ->get();
+    
+        return response()->json($data);
+    }
+    public function bounceRateStats()
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(trafic_stats $trafic_stats)
     {
-        //
+        $data = \DB::table('trafic_stats')
+            ->select(
+                \DB::raw('DATE_FORMAT(date, "%Y-%m") as month'),
+                \DB::raw('ROUND(AVG(bounce_rate), 2) as avg_bounce_rate') // Moyenne du taux de rebond
+            )
+            ->groupBy(\DB::raw('DATE_FORMAT(date, "%Y-%m")'))
+            ->orderBy('month')
+            ->get();
+    
+        return response()->json($data);
     }
+    public function getVisitPagesBySession(){
+        $data = \DB::table('trafic_stats')
+        ->select('sessions', \DB::raw('SUM(pages_vues_totales) as total_pages_vues'))
+        ->groupBy('sessions')
+        ->get();
+    return response()->json($data);
+}
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, trafic_stats $trafic_stats)
-    {
-        //
-    }
+    public function getNewVsReturningVisitors() {
+        $visitorsData = trafic_stats::select('date', 'nouveaux_visiteurs')
+        ->orderBy('date', 'asc')
+        ->get();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(trafic_stats $trafic_stats)
-    {
-        //
-    }
+$growthRates = [];
+for ($i = 1; $i < count($visitorsData); $i++) {
+$previous = $visitorsData[$i - 1];
+$current = $visitorsData[$i];
+
+$growthRate = (($current->nouveaux_visiteurs - $previous->nouveaux_visiteurs) / $previous->nouveaux_visiteurs) * 100;
+
+$growthRates[] = [
+'date' => $current->date,
+'growth_rate' => round($growthRate, 2),
+];
+}
+
+return response()->json($growthRates);
+}
+
 }

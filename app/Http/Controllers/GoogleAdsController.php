@@ -12,6 +12,9 @@ class GoogleAdsController extends Controller
         public function extractAdsData(){
             //extract
             $json=file_get_contents(storage_path('app/analytics/google_ads_data.json'));
+            if (!file_exists($file)) {
+                return null;
+            }
             $data=json_decode($json,true);//result=une fonction pour decoder le fichier json et le mettre dans un tableau associatif 
             return $data;//retrun result
 

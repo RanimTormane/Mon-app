@@ -16,6 +16,8 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\GoogleAnalyticsController;
 use App\Http\Controllers\GoogleAdsController;
+use App\Http\Controllers\TraficStatsController;
+
 
 
 /*
@@ -123,3 +125,13 @@ Route::get('/ROAS', [GoogleAdsController::class, 'getGlobalROAS']);
 Route::get('/ROAS-by-product', [GoogleAdsController::class, 'getROASByProduct']);
 Route::get('/ROAS-by-campaign', [GoogleAdsController::class, 'getROASByCampaign']);
 Route::get('/profit-by-campain', [GoogleAdsController::class, 'getProfitabilityByCampaign']);
+
+
+
+//trafic-stats
+Route::get('/Trafic-data', [TraficStatsController::class, 'etlProcessTrafic']);
+Route::get('/visit-by-month', [TraficStatsController::class, 'getVisiterByMonth']);
+Route::get('/sessionDuration-by-month', [TraficStatsController::class, 'getSessionDurationByMonth']);
+Route::get('/bounce-rate-stats', [TraficStatsController::class, 'bounceRateStats']);
+Route::get('/pages-vues-session', [TraficStatsController::class, 'getVisitPagesBySession']);
+Route::get('/new-returning-visitors', [TraficStatsController::class, 'getNewVsReturningVisitors']);
