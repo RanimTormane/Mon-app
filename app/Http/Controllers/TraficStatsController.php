@@ -102,25 +102,37 @@ class TraficStatsController extends Controller
     return response()->json($data);
 }
 
-    public function getNewVsReturningVisitors() {
-        $visitorsData = trafic_stats::select('date', 'nouveaux_visiteurs')
+public function getNewVisitors() {
+    // On récupère les données pour plusieurs jours de l'année 2024
+    $targetDates = ['2024-01-26', '2024-03-01', '2024-04-10', '2024-05-15']; // Exemple de dates supplémentaires
+
+    $visitorsData = trafic_stats::whereIn('date', $targetDates)
+        ->select('date', 'nouveaux_visiteurs')
         ->orderBy('date', 'asc')
         ->get();
 
-$growthRates = [];
-for ($i = 1; $i < count($visitorsData); $i++) {
-$previous = $visitorsData[$i - 1];
-$current = $visitorsData[$i];
+    $growthRates = [];
 
-$growthRate = (($current->nouveaux_visiteurs - $previous->nouveaux_visiteurs) / $previous->nouveaux_visiteurs) * 100;
+    for ($i = 1; $i < count($visitorsData); $i++) {
+        $previous = $visitorsData[$i - 1];
+        $current = $visitorsData[$i];
 
-$growthRates[] = [
-'date' => $current->date,
-'growth_rate' => round($growthRate, 2),
-];
+        // Éviter la division par zéro
+        if ($previous->nouveaux_visiteurs == 0) {
+            $growthRate = 0;
+        } else {
+            $growthRate = (($current->nouveaux_visiteurs - $previous->nouveaux_visiteurs) / $previous->nouveaux_visiteurs) * 100;
+        }
+
+        $growthRates[] = [
+            'from_date' => $previous->date,
+            'to_date' => $current->date,
+            'growth_rate' => round($growthRate, 2),
+        ];
+    }
+
+   
+
+    return response()->json($growthRates);
 }
-
-return response()->json($growthRates);
-}
-
 }

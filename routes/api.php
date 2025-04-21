@@ -17,7 +17,7 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\GoogleAnalyticsController;
 use App\Http\Controllers\GoogleAdsController;
 use App\Http\Controllers\TraficStatsController;
-
+use App\Http\Controllers\ResetPasswordController;
 
 
 /*
@@ -101,7 +101,7 @@ Route::group([
     Route::post('me', [AuthController::class,'me']);
     Route::post('/activate-user/{id}', [AdminController::class, 'activateUser']);
     Route::middleware('auth:sanctum')->get('/users-pending', [UserController::class, 'getPendingUsers']);
-
+    Route::post('sentPasswordReserLink',[ResetPasswordController::class,'sendEmail']);
     
     
 });
@@ -134,4 +134,4 @@ Route::get('/visit-by-month', [TraficStatsController::class, 'getVisiterByMonth'
 Route::get('/sessionDuration-by-month', [TraficStatsController::class, 'getSessionDurationByMonth']);
 Route::get('/bounce-rate-stats', [TraficStatsController::class, 'bounceRateStats']);
 Route::get('/pages-vues-session', [TraficStatsController::class, 'getVisitPagesBySession']);
-Route::get('/new-returning-visitors', [TraficStatsController::class, 'getNewVsReturningVisitors']);
+Route::get('/new-visitors-date', [TraficStatsController::class, 'getNewVisitors']);
