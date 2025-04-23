@@ -31,9 +31,9 @@ public function handle($request, Closure $next, ...$guards)
             return response()->json(['error' => 'User not found'], 404);
         }
 
-        if ($user->role !== 'Admin') {
+       /* if ($user->role !== 'Admin') {
             return response()->json(['error' => 'Access denied'], 403);
-        }
+        }*/
 
         return $next($request);
 

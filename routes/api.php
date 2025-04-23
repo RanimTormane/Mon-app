@@ -18,6 +18,9 @@ use App\Http\Controllers\GoogleAnalyticsController;
 use App\Http\Controllers\GoogleAdsController;
 use App\Http\Controllers\TraficStatsController;
 use App\Http\Controllers\ResetPasswordController;
+use App\Http\Controllers\ChangePasswordController;
+use App\Http\Controllers\ProfileController;
+
 
 
 /*
@@ -98,13 +101,15 @@ Route::group([
     Route::post('signup', [AuthController::class,'signup']);
     Route::post('logout', [AuthController::class,'logout']);
     Route::post('refresh', [AuthController::class,'refresh']);
-    Route::post('me', [AuthController::class,'me']);
+    Route::get('profile', [AuthController::class,'me'])->middleware('auth:api');
     Route::post('/activate-user/{id}', [AdminController::class, 'activateUser']);
     Route::middleware('auth:sanctum')->get('/users-pending', [UserController::class, 'getPendingUsers']);
     Route::post('sentPasswordReserLink',[ResetPasswordController::class,'sendEmail']);
-    
+    Route::post('resetPassword',[ChangePasswordController::class,'resetPassword']);
+  
     
 });
+
 
 //google_analytics
 Route::get('/kpi-data', [GoogleAnalyticsController::class, 'etlProcess']);

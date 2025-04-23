@@ -64,4 +64,5 @@ public function edit(User $user){
         $user->delete();
         return response()->json(['message' => 'User deleted successfully'], 200);
     }
+
 }
