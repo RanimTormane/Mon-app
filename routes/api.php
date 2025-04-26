@@ -108,8 +108,9 @@ Route::group([
     Route::post('sentPasswordReserLink',[ResetPasswordController::class,'sendEmail']);
     Route::post('resetPassword',[ChangePasswordController::class,'resetPassword']);
     Route::post('/update-profile', [UserController::class, 'updateProfile']);
-    
+   
 });
+Route::middleware('auth:api')->post('change-password', [UserController::class, 'changePassword']);
 
 
 //google_analytics

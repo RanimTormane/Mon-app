@@ -6,8 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Http\Requests\saveUserRequest;
 use App\Http\Requests\updateProfileRequest;
-
-
+use Illuminate\Support\Facades\Hash;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 class UserController extends Controller
 {
    public function index(){
@@ -109,5 +111,41 @@ public function edit(User $user){
     ], 200);
 }
 
-    
+
+
+public function changePassword(Request $request)
+{ 
+    $token = $request->bearerToken();
+    Log::info("Token reçu: " . $token);
+
+    try {
+        // Essayer de récupérer l'utilisateur avec le token
+        $user = JWTAuth::parseToken()->authenticate();
+        Log::info("Utilisateur authentifié: " . $user->email);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Token invalide ou expiré'], 401);
+    }
+
+    $request->validate([
+        'current_password' => 'required|string',
+        'new_password' => 'required|string|min:8|confirmed', // new_password + new_password_confirmation
+    ]);
+
+    // Ajout d'un log pour déboguer les mots de passe
+    Log::info("Mot de passe actuel reçu: " . $request->current_password);
+    Log::info("Mot de passe actuel de l'utilisateur: " . $user->password);
+
+    // Vérification du mot de passe actuel
+    if (!Hash::check($request->current_password, $user->password)) {
+        return response()->json(['message' => 'Current password does not match.'], 400);
+    }
+
+    // Mise à jour du mot de passe
+    $user->password = Hash::make($request->new_password);
+    $user->save();
+
+    return response()->json([
+        'message' => 'Password changed successfully.'
+    ], 200);
+}
 }
