@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('google_ads', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('api_id')->constrained('api')->onDelete('cascade');
             $table->string('campaign_name');
             $table->string('product_name');
             $table->decimal('cost', 10, 2);

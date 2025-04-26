@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('google_analytics', function (Blueprint $table) {
             $table->id();
-            $table->uuid('visitor_id'); // UUID for visitor
-            $table->uuid('session'); // UUID for session
+            $table->foreignId('api_id')->constrained('api')->onDelete('cascade');
+           
+            $table->uuid('visitor_id'); 
+            $table->uuid('session');
             $table->dateTime('visit_date'); // Date and time of visit
             $table->enum('campaign_name', ['Google Ads', 'Facebook Ads', 'Email Marketing', 'LinkedIn Ads', 'TikTok Ads']); // Campaign
             $table->enum('traffic_source', ['SEO', 'SEA', 'Social Media', 'Direct', 'Referral']); // Traffic source

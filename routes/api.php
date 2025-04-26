@@ -90,6 +90,7 @@ Route::get('/show-user/{user}', [UserController::class, 'show']);
 Route::delete('/delete-user/{user}',[UserController::class,'destroy']);
 
 
+
 Route::group([
 
     'middleware' => 'api',
@@ -106,7 +107,7 @@ Route::group([
     Route::middleware('auth:sanctum')->get('/users-pending', [UserController::class, 'getPendingUsers']);
     Route::post('sentPasswordReserLink',[ResetPasswordController::class,'sendEmail']);
     Route::post('resetPassword',[ChangePasswordController::class,'resetPassword']);
-  
+    Route::post('/update-profile', [UserController::class, 'updateProfile']);
     
 });
 

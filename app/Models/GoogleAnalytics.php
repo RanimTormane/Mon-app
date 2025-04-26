@@ -11,6 +11,7 @@ class GoogleAnalytics extends Model
     protected $table='google_analytics';
     //make sure that the fields are stored 
     protected $fillable = [
+        'api_id',
         'visitor_id',
         'session',
         'visit_date',
@@ -20,4 +21,7 @@ class GoogleAnalytics extends Model
         'is_converted',
         'lead_id',
     ];
-}
+    public function api()
+    {
+        return $this->belongsTo(API::class, 'api_id');
+    }}

@@ -26,6 +26,7 @@ class saveUserRequest extends FormRequest
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
             'role' => 'required|string|in:Admin,Marketing manager,Marketing assistant',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ];
     }
 

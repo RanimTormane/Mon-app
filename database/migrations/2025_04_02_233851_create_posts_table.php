@@ -16,7 +16,7 @@ return new class extends Migration
            
         
            
-            $table->foreignId('client_id')->constrained('clients')->onDelete('cascade');
+            $table->foreignId('client_id')->constrained('instagram_account')->onDelete('cascade');
 
            $table->unsignedBigInteger('api_id')->nullable();
 

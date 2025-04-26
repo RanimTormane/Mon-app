@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Clients extends Model
 {
     use HasFactory;
-    protected $table = 'clients';
+    protected $table = 'instagram_account';
     protected $fillable = [
         'instagram_id',
         'username',

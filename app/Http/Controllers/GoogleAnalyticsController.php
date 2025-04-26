@@ -41,10 +41,11 @@ class GoogleAnalyticsController extends Controller
      * Charger les données dans la base de données
      * Cette fonction va insérer ou mettre à jour les données dans la table `google_analytics`
      */
-    public function loadData($data)
+    public function loadData($data,$apiId)
     {
         foreach ($data as $item) {
             GoogleAnalytics::create([
+                'api_id' => $apiId, 
                 'visitor_id' => $item['visitor_id'],
                 'session' => $item['session'],
                 'visit_date' => $item['visit_date'],
@@ -60,22 +61,31 @@ class GoogleAnalyticsController extends Controller
     /**
      * Le processus ETL complet : Extraction, Transformation et Chargement
      */
-    public function etlProcess()
+    public function etlProcess(Request $request)
     {
+        // Récupération dynamique de api_id (via query param ou body)
+        $apiId = $request->input('api_id');
+    
+        if (!$apiId) {
+            return response()->json([
+                'message' => 'api_id est requis.'
+            ], 400);
+        }
+    
         // Extraction des données
         $data = $this->extractData();
-
+    
         // Transformation des données
         $transformedData = $this->transformData($data);
-
-        // Chargement des données dans la base de données
-        $this->loadData($transformedData);
-
+    
+        // Chargement avec api_id
+        $this->loadData($transformedData, $apiId);
+    
         return response()->json([
-            'message' => 'Le processus ETL a été effectué avec succès.',
-        ], 200);
+            'message' => 'ETL avec api_id effectué avec succès.',
+        ]);
     }
-
+    
     public function getConversionGlobalRate()
 {
     // Nombre total de visiteurs (sessions)

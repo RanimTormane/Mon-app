@@ -12,9 +12,8 @@ class GoogleAdsController extends Controller
         public function extractAdsData(){
             //extract
             $json=file_get_contents(storage_path('app/analytics/google_ads_data.json'));
-            if (!file_exists($file)) {
-                return null;
-            }
+           
+            
             $data=json_decode($json,true);//result=une fonction pour decoder le fichier json et le mettre dans un tableau associatif 
             return $data;//retrun result
 
@@ -37,10 +36,11 @@ class GoogleAdsController extends Controller
          return $data;
         }
 
-        public function loadAdsData($data){
+        public function loadAdsData($data,$apiId){
             //load
             foreach ($data as $item) {
                 google_Ads::create([
+                    'api_id'=>$apiId,
                     'campaign_name' => $item['campaign_name'],
                     'product_name' => $item['product_name'],
                     'cost' => $item['cost'],
@@ -52,11 +52,18 @@ class GoogleAdsController extends Controller
 
             }
         }
-        public function etlProcessAds()
-        {
+        public function etlProcessAds(Request $request)
+        { 
+            $apiId = $request->input('api_id');
+    
+            if (!$apiId) {
+                return response()->json([
+                    'message' => 'api_id est requis.'
+                ], 400);
+            }
             $data = $this->extractAdsData();
             $transformed = $this->transformAdsData($data);
-            $this->loadAdsData($transformed);
+            $this->loadAdsData($transformed, $apiId);
 
             return response()->json(['message' => 'ETL terminé avec succès 🚀']);
         }

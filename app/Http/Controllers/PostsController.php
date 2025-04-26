@@ -114,7 +114,7 @@ if (!$client) {
                     posts::create([
                       
                         'client_id' => $client->id,
-                        'api_id' => $apiId,  // Assure-toi que l'ID du client est bien fourni
+                        'api_id' => $apiId,  
                         'post_id' => $post['post_id'],
                         'caption' => $post['caption'],
                         'like_count' => $post['like_count'],

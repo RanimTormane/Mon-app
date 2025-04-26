@@ -7,51 +7,64 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 class TraficStatsController extends Controller
 {
-    public function extractTraficData()
-    {
-        $json=file_get_contents(storage_path('app/analytics/trafic_stats.json'));
-        $data=json_decode($json,true);
-        return $data;
-       
+    public function extractTraficData(Request $request)
+{
+    $apiId = $request->query('api_id');
+    if (!$apiId) {
+        throw new \InvalidArgumentException('api_id est requis');
     }
-    public function transformTraficData($data){
-        foreach ($data as $entry) {
-            trafic_stats::create([
-                'date' => Carbon::parse($entry['date'])->format('Y-m-d'),
-                'visiteurs_uniques' => $entry['visiteurs_uniques'],
-                'sessions' => $entry['sessions'],
-                'temps_total_site' => $entry['temps_total_site'],
-                'bounce_rate' => $entry['bounce_rate'],
-                'pages_vues_totales' => $entry['pages_vues_totales'],
-                'nouveaux_visiteurs' => $entry['nouveaux_visiteurs'],
-                'visiteurs_recurrents' => $entry['visiteurs_recurrents'],]);
-    }}
-    public function loadTraficData($data){
-        //load
-        if (is_array($data) || is_object($data)) {
-        foreach ($data as $entry) {
-            trafic_stats::create([
-                'date' => $entry['date'],
-                'visiteurs_uniques' => $entry['visiteurs_uniques'],
-                'sessions' => $entry['sessions'],
-                'temps_total_site' => $entry['temps_total_site'],
-                'bounce_rate' => $entry['bounce_rate'],
-                'pages_vues_totales' => $entry['pages_vues_totales'],
-                'nouveaux_visiteurs' => $entry['nouveaux_visiteurs'],
-                'visiteurs_recurrents' => $entry['visiteurs_recurrents']
-            ]);
 
-        }
-    }}
-    public function etlProcessTrafic()
-    {
-        $data = $this->extractTraficData();
-    
-        $transformed = $this->transformTraficData($data);
-        $this->loadTraficData($transformed);
+    $filePath = storage_path('app/analytics/trafic_stats.json');
+    if (!file_exists($filePath)) {
+        throw new \RuntimeException('Fichier trafic_stats.json introuvable');
+    }
+
+    $json = file_get_contents($filePath);
+    $data = json_decode($json, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        throw new \RuntimeException('Erreur lors du décodage du JSON');
+    }
+
+    return $data;
+}
+
+public function transformTraficData($data, $apiId)
+{
+    foreach ($data as $entry) {
+        trafic_stats::create([
+            'api_id' => $apiId,
+            'date' => Carbon::parse($entry['date'])->format('Y-m-d'),
+            'visiteurs_uniques' => $entry['visiteurs_uniques'],
+            'sessions' => $entry['sessions'],
+            'temps_total_site' => $entry['temps_total_site'],
+            'bounce_rate' => $entry['bounce_rate'],
+            'pages_vues_totales' => $entry['pages_vues_totales'],
+            'nouveaux_visiteurs' => $entry['nouveaux_visiteurs'],
+            'visiteurs_recurrents' => $entry['visiteurs_recurrents'],
+        ]);
+    }
+}
+
+public function etlProcessTrafic(Request $request)
+{
+    try {
+        // Extract the data
+        $extracted = $this->extractTraficData($request);
+
+        // Get api_id from the request
+        $apiId = $request->query('api_id');
+
+        // Transform and save the data
+        $this->transformTraficData($extracted, $apiId);
 
         return response()->json(['message' => 'ETL terminé avec succès 🚀']);
+    } catch (\InvalidArgumentException $e) {
+        return response()->json(['error' => $e->getMessage()], 400);
+    } catch (\RuntimeException $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
     public function getVisiterByMonth(){
 
         $data = \DB::table('trafic_stats')

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('kpi', function (Blueprint $table) {
             $table->id();
            
-            $table->foreignId('client_id')->nullable()->constrained('clients')->onDelete('cascade');
+            $table->foreignId('client_id')->nullable()->constrained('instagram_account')->onDelete('cascade');
 
             $table->string('name'); 
             $table->decimal('value', 8, 2); 
