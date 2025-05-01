@@ -105,10 +105,16 @@ public function edit(User $user){
     // Mettre à jour l'utilisateur
     $user->update($data);
 
+    // Construct the avatar URL consistently
+    $avatarUrl = null;
+    if ($user->avatar) {
+        $avatarUrl = asset('storage/' . $user->avatar);
+    }
+
     return response()->json([
         'message' => 'Profile updated successfully',
         'user' => $user,
-        'avatar_url' => $user->avatar ? url('storage/' . $user->avatar) : null, // URL publique de l'avatar
+        'avatar_url' => $avatarUrl,
     ], 200);
 }
 
