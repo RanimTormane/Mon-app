@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\ChangePassword;
 class UserController extends Controller
 {
    public function index(){
@@ -113,39 +114,35 @@ public function edit(User $user){
 
 
 
-public function changePassword(Request $request)
-{ 
+
+public function changePassword(changePassword $request)
+{
     $token = $request->bearerToken();
     Log::info("Token reçu: " . $token);
 
     try {
-        // Essayer de récupérer l'utilisateur avec le token
         $user = JWTAuth::parseToken()->authenticate();
         Log::info("Utilisateur authentifié: " . $user->email);
     } catch (\Exception $e) {
         return response()->json(['error' => 'Token invalide ou expiré'], 401);
     }
 
-    $request->validate([
-        'current_password' => 'required|string',
-        'new_password' => 'required|string|min:8|confirmed', // new_password + new_password_confirmation
-    ]);
+    $data = $request->validated();
 
-    // Ajout d'un log pour déboguer les mots de passe
-    Log::info("Mot de passe actuel reçu: " . $request->current_password);
+    // Log pour debug
+    Log::info("Mot de passe actuel reçu: " . $data['current_password']);
     Log::info("Mot de passe actuel de l'utilisateur: " . $user->password);
 
-    // Vérification du mot de passe actuel
-    if (!Hash::check($request->current_password, $user->password)) {
-        return response()->json(['message' => 'Current password does not match.'], 400);
+    if (!Hash::check($data['current_password'], $user->password)) {
+        return response()->json(['message' => 'Le mot de passe actuel ne correspond pas.'], 400);
     }
 
-    // Mise à jour du mot de passe
-    $user->password = Hash::make($request->new_password);
+    $user->password = Hash::make($data['new_password']);
     $user->save();
 
     return response()->json([
-        'message' => 'Password changed successfully.'
+        'message' => 'Mot de passe changé avec succès.'
     ], 200);
 }
+
 }

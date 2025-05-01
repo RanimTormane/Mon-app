@@ -189,5 +189,26 @@ public function getLeadScoreEvolution()
 
     return response()->json($chartData);
 }
+public function getFilteredData(Request $request)
+{
+    $query = GoogleAnalytics::query();
+
+    if ($request->filled('campaign_name')) {
+        $query->where('campaign_name', $request->campaign_name);
+    }
+
+    if ($request->filled('traffic_source')) {
+        $query->where('traffic_source', $request->traffic_source);
+    }
+
+    if ($request->filled('lead_type')) {
+        $query->where('lead_type', $request->lead_type);
+    }
+   
+    $results = $query->get()->toArray();
+
+    return response()->json($results);
+}
+
 
 }

@@ -16,8 +16,10 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('password_reset_token')->default('')->change(); 
             $table->string('role')->default('user');
             $table->string('avatar')->nullable();
+
             
             $table->timestamps();
         });

@@ -120,6 +120,7 @@ Route::get('/conversion-campagnes', [GoogleAnalyticsController::class, 'conversi
 Route::get('/conversions-by-traffic', [GoogleAnalyticsController::class, 'getConversionsByTrafficSource']);
 Route::get('/conversions-by-lead-type', [GoogleAnalyticsController::class, 'getConversionsByLeadType']);
 Route::get('/kpi/lead-score-evolution', [GoogleAnalyticsController::class, 'getLeadScoreEvolution']);
+Route::post('/marketing-filter', [GoogleAnalyticsController::class, 'getFilteredData']);
 
 
 //google_ads
@@ -132,6 +133,7 @@ Route::get('/ROAS', [GoogleAdsController::class, 'getGlobalROAS']);
 Route::get('/ROAS-by-product', [GoogleAdsController::class, 'getROASByProduct']);
 Route::get('/ROAS-by-campaign', [GoogleAdsController::class, 'getROASByCampaign']);
 Route::get('/profit-by-campain', [GoogleAdsController::class, 'getProfitabilityByCampaign']);
+Route::post('/finance-filter', [GoogleAdsController::class, 'filterFinanceData']);
 
 
 
@@ -142,3 +144,4 @@ Route::get('/sessionDuration-by-month', [TraficStatsController::class, 'getSessi
 Route::get('/bounce-rate-stats', [TraficStatsController::class, 'bounceRateStats']);
 Route::get('/pages-vues-session', [TraficStatsController::class, 'getVisitPagesBySession']);
 Route::get('/new-visitors-date', [TraficStatsController::class, 'getNewVisitors']);
+Route::post('/traffic-filter',[TraficStatsController::class,'filterTraficData']);

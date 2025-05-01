@@ -24,32 +24,14 @@ class ResetPasswordController extends Controller
     
     public function send($email)
     {
-        $token = $this->createToken($email);
-        Mail::to($email)->send(new ResetPasswordMail($token));
+        // Créer un token
+        $token = Str::random(60); $resetLink = url('reset-password?email=' . $email . '&token=' . $token); 
+
+        // Envoyer l'email avec le token
+        Mail::to($email)->send(new ResetPasswordMail($resetLink));
     }
 
-    public function createToken($email)
-    {
-        $oldToken = \DB::table('reset_passwords')->where('email', $email)->first();
-        
-        if ($oldToken) {
-            return $oldToken->token;
-        }
-
-        $token = Str::random(60);
-
-        $this->saveToken($token, $email);
-        return $token;
-    }
-
-    public function saveToken($token, $email)
-    {
-        \DB::table('reset_passwords')->insert([
-            'email' => $email,
-            'token' => $token,
-            'created_at' => Carbon::now()
-        ]);
-    }
+ 
     //check if the email exist in the database  if its true return the email from the database ans the reverse boolean function by !!
     public function validateEmail($email)
     {

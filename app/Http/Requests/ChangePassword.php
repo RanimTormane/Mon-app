@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class updateProfileRequest extends FormRequest
+class ChangePassword extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,18 +22,17 @@ class updateProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-          
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email',
-        'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
         ];
     }
     public function messages()
     {
         return [
-            'name.required' => 'The name is required.',
-            'email.required' => 'The email is required.',
-            'email.email' => 'The email must be valid.',
-            'email.unique' => 'This email is already taken.'];
-}
+            'current_password.required' => 'The current password is required.',
+            'new_password.required' => 'The new password is required.',
+            'new_password.min' => 'The new password must be at least 8 characters.',
+            'new_password.confirmed' => 'The new password confirmation does not match.',
+        ];
+    }
 }

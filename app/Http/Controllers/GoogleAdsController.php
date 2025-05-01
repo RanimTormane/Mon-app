@@ -194,5 +194,41 @@ class GoogleAdsController extends Controller
 
             return response()->json($result);
         }
+        public function filterFinanceData(Request $request)
+        {
+           // Validation des filtres reçus
+        $validated = $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'campaign_name' => 'nullable|string',
+            'min_cost' => 'nullable|numeric',
+        ]);
 
+        // Requête pour obtenir les données filtrées
+        $query = google_Ads::query();
+
+        // Filtrer par date
+        if ($request->has('start_date') && $request->start_date) {
+            $query->where('date', '>=', $request->start_date);
+        }
+
+        if ($request->has('end_date') && $request->end_date) {
+            $query->where('date', '<=', $request->end_date);
+        }
+
+        // Filtrer par nom de campagne
+        if ($request->has('campaign_name') && $request->campaign_name) {
+            $query->where('campaign_name', 'LIKE', '%' . $request->campaign_name . '%');
+        }
+
+        // Filtrer par coût minimal
+        if ($request->has('min_cost') && $request->min_cost) {
+            $query->where('cost', '>=', $request->min_cost);
+        }
+
+        // Exécuter la requête et récupérer les données
+        $data = $query->get();
+
+        return response()->json($data);
     }
+}

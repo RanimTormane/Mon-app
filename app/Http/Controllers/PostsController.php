@@ -364,6 +364,8 @@ public function filterPosts(Request $request)
         $query->where('caption', 'like', '%' . $request->caption . '%');
     }
 
+    
+
     return $query->orderBy('timestamp', 'desc')->get();
 }
         }

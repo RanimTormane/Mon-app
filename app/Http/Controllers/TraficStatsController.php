@@ -148,4 +148,32 @@ public function getNewVisitors() {
 
     return response()->json($growthRates);
 }
+public function filterTraficData(Request $request)
+{
+    $query = trafic_stats::query();
+
+    if ($request->has('date_debut') && $request->has('date_fin')) {
+        $query->whereBetween('date', [$request->input('date_debut'), $request->input('date_fin')]);
+    }
+
+    if ($request->has('bounce_rate_min')) {
+        $query->where('bounce_rate', '>=', $request->input('bounce_rate_min'));
+    }
+
+    if ($request->has('bounce_rate_max')) {
+        $query->where('bounce_rate', '<=', $request->input('bounce_rate_max'));
+    }
+
+    if ($request->has('visiteurs_uniques_min')) {
+        $query->where('visiteurs_uniques', '>=', $request->input('visiteurs_uniques_min'));
+    }
+
+    if ($request->has('visiteurs_uniques_max')) {
+        $query->where('visiteurs_uniques', '<=', $request->input('visiteurs_uniques_max'));
+    }
+
+    // Ajouter d'autres critères si nécessaire (sessions, pages vues, etc.)
+
+    return $query->get();
+}
 }
