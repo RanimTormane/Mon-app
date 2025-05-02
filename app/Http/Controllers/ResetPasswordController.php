@@ -14,21 +14,38 @@ class ResetPasswordController extends Controller
 {
     public function sendEmail(Request $request)
     {
-       //if we dont have the email return a failed response 
+        $request->validate([
+            'email' => 'required|email'
+        ], [
+            'email.email' => 'L\'adresse email n\'est pas valide.',
+            
+        ]);
+    
+        // Vérifier si l'email existe dans la base de données
         if (!$this->validateEmail($request->email)) {
             return $this->failedResponse();
         }
-       $this->send($request->email);
-       return $this->successResponse();
+    
+        $this->send($request->email);
+        return $this->successResponse();
     }
     
     public function send($email)
     {
-        // Créer un token
-        $token = Str::random(60); $resetLink = url('reset-password?email=' . $email . '&token=' . $token); 
+        // Create token
+        $token = Str::random(60);
+        
+        // Store token in database
+        \DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $email],
+            [
+                'token' => $token,
+                'created_at' => now()
+            ]
+        );
 
-        // Envoyer l'email avec le token
-        Mail::to($email)->send(new ResetPasswordMail($resetLink));
+        // Send email with token
+        Mail::to($email)->send(new ResetPasswordMail($token));
     }
 
  
@@ -37,6 +54,7 @@ class ResetPasswordController extends Controller
     {
         return !!User::where('email', $email)->first();
     }
+
 
     public function failedResponse()
     {

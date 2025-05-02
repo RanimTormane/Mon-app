@@ -42,9 +42,12 @@ class ResetPasswordMail extends Mailable
     }
     public function build()
     {
-        return $this->markdown('Email.passwordReset')->with([
-            'token' => $this->token
-        ]);
+        $resetLink = url('http://localhost:4200/response-reset-password?token=' . $this->token);
+        return $this->markdown('Email.passwordReset')
+            ->with([
+                'token' => $this->token,
+                'resetLink' => $resetLink
+            ]);
     }
     /**
      * Get the attachments for the message.

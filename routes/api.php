@@ -105,12 +105,17 @@ Route::group([
     Route::get('profile', [AuthController::class,'me'])->middleware('auth:api');
     Route::post('/activate-user/{id}', [AdminController::class, 'activateUser']);
     Route::middleware('auth:sanctum')->get('/users-pending', [UserController::class, 'getPendingUsers']);
-    Route::post('sentPasswordReserLink',[ResetPasswordController::class,'sendEmail']);
-    Route::post('resetPassword',[ChangePasswordController::class,'resetPassword']);
     Route::post('/update-profile', [UserController::class, 'updateProfile']);
-   
+
+    // Password reset routes (no auth required)
+    Route::post('sentPasswordReserLink', [ResetPasswordController::class, 'sendEmail']);
+    Route::post('resetPassword', [ChangePasswordController::class, 'resetPassword']);
+
+    // Protected routes
+    Route::middleware('auth:api')->group(function () {
+        Route::post('change-password', [UserController::class, 'changePassword']);
+    });
 });
-Route::middleware('auth:api')->post('change-password', [UserController::class, 'changePassword']);
 
 
 //google_analytics
