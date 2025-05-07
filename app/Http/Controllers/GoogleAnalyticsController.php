@@ -152,43 +152,7 @@ public function getConversionsByLeadType()
 }
 
 
-public function getLeadScoreEvolution()
-{
-    $scoreMap = ['Froid' => 1, 'Tiède' => 2, 'Chaud' => 3];
 
-    $data = GoogleAnalytics::select('session', 'traffic_source', 'lead_type')
-        ->orderBy('visit_date')//On trie les données selon la date de visite (visit_date) pour avoir une chronologie.
-
-
-        ->get()
-        ->map(function ($row) use ($scoreMap) {
-            return [
-                'session' => $row->session,
-                'source' => $row->traffic_source,
-                'score' => $scoreMap[$row->lead_type],//convertit le type de lead (lead_type) en score numérique 1/2/3
-            ];
-        });
-
-    // Group by traffic source for line chart format
-    $grouped = [];
-    foreach ($data as $row) {
-        $grouped[$row['source']][] = [
-            'name' => $row['session'],//name = session axe x
-            'value' => $row['score']//value = score du lead axe y
-        ];
-    }
-
-    // Format pour ngx-charts
-    $chartData = [];
-    foreach ($grouped as $source => $series) {
-        $chartData[] = [
-            'name' => $source,
-            'series' => $series
-        ];
-    }
-
-    return response()->json($chartData);
-}
 public function getFilteredData(Request $request)
 {
     $query = GoogleAnalytics::query();

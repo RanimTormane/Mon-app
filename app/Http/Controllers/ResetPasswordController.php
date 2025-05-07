@@ -17,7 +17,7 @@ class ResetPasswordController extends Controller
         $request->validate([
             'email' => 'required|email'
         ], [
-            'email.email' => 'L\'adresse email n\'est pas valide.',
+            'email.email' => 'Email is invalid.',
             
         ]);
     

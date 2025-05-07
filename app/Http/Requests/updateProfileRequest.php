@@ -29,7 +29,7 @@ class updateProfileRequest extends FormRequest
                 'email',
                 Rule::unique('users')->ignore(auth()->id())
             ],
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+           
         ];
     }
 
