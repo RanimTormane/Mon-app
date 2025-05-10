@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\GoogleAnalytics;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Models\FactConversions;
+use App\Models\DimDate;
+use App\Models\DimCampaign;
 
 
 class GoogleAnalyticsController extends Controller
@@ -123,6 +126,68 @@ $data = GoogleAnalytics::select('campaign_name')
 
 return response()->json($data);
 }
+
+//DWH
+
+public function populateConversionsDatamart()
+{
+    $analyticsData = GoogleAnalytics::select('campaign_name')
+        ->selectRaw('COUNT(*) as total')
+        ->selectRaw('SUM(is_converted) as converted')
+        ->selectRaw('DATE(visit_date) as campaign_date')
+        ->selectRaw('MAX(lead_type) as lead_type') // Prendre lead_type dominant
+        ->groupBy('campaign_name', 'campaign_date')
+        ->get();
+
+    foreach ($analyticsData as $item) {
+        // Réutiliser Dim_Date existante
+        $date = Carbon::parse($item->campaign_date);
+        $dateId = DimDate::firstOrCreate([
+            'day' => $date->day,
+            'month' => $date->month,
+            'year' => $date->year,
+            'full_date' => $date
+        ])->date_id;
+
+        // Ajouter à Dim_Campaign
+        $campaign = DimCampaign::firstOrCreate([
+            'campaign_name' => $item->campaign_name
+        ], [
+            'product_name' => null,
+            'lead_type' => $item->lead_type
+        ]);
+
+        // Calculer le taux de conversion
+        $taux = $item->total > 0 ? round(($item->converted / $item->total) * 100, 2) : 0;
+
+        // Ajouter à Fact_Conversions
+        FactConversions::create([
+            'campaign_id' => $campaign->campaign_id,
+            'date_id' => $dateId,
+            'total' => $item->total,
+            'converted' => $item->converted,
+            'conversion_rate' => $taux
+        ]);
+    }
+
+    return response()->json(['message' => 'Datamart populated successfully']);
+}
+
+public function getConversionRateByCampaign()
+    {
+        $data = FactConversions::select('dim_campaign.campaign_name', 'fact_conversions.conversion_rate')
+            ->join('dim_campaign', 'fact_conversions.campaign_id', '=', 'dim_campaign.campaign_id')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'campaign_name' => $item->campaign_name,
+                    'taux_conversion' => $item->conversion_rate
+                ];
+            });
+
+        return response()->json($data);
+    }
+
 
 
 

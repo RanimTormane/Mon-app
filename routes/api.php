@@ -72,7 +72,8 @@ Route::get('/test-engagement', [PostsController::class, 'transformEngagementData
 
 
 Route::get('/engagement/{clientId}', [PostsController::class, 'calculateEngagementKPI']);
-
+Route::get('/populate-engagement-dwh/{clientId}', [PostsController::class, 'populateEngagementDWH']);
+Route::get('/engagement-dwh/{clientId}', [PostsController::class, 'getEngagementFromDWH']);
 Route::get('/engagement/posts/{clientId}', [PostsController::class, 'getEngagementPerPost']);
 Route::get('/kpis', [PostsController::class, 'showAllKpis']);
 Route::get('/interactions/{clientId}',[PostsController::class,'getInteractions']);
@@ -122,6 +123,8 @@ Route::group([
 Route::get('/kpi-data', [GoogleAnalyticsController::class, 'etlProcess']);
 Route::get('/conversion-Rate', [GoogleAnalyticsController::class, 'getConversionGlobalRate']);
 Route::get('/conversion-campagnes', [GoogleAnalyticsController::class, 'conversionParCampagne']);
+Route::get('/conversion-rate-by-campaign', [GoogleAnalyticsController::class, 'populateConversionsDatamart']);
+Route::get('/kpi/conversion-rate-by-campaign', [GoogleAnalyticsController::class, 'getConversionRateByCampaign']);
 Route::get('/conversions-by-traffic', [GoogleAnalyticsController::class, 'getConversionsByTrafficSource']);
 Route::get('/conversions-by-lead-type', [GoogleAnalyticsController::class, 'getConversionsByLeadType']);
 Route::get('/kpi/lead-score-evolution', [GoogleAnalyticsController::class, 'getLeadScoreEvolution']);

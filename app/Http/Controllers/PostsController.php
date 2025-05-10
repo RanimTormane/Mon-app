@@ -8,6 +8,10 @@ use Carbon\Carbon;
 use App\Models\Clients;
 use App\Models\API;
 use App\Models\KPIs;
+use App\Models\DimDate;
+use App\Models\DimPost;
+use App\Models\FactEngagement;
+use Illuminate\Support\Str;
 
 class PostsController extends Controller
 {
@@ -157,7 +161,7 @@ if (!$client) {
     return response()->json(['engagement_global' => $engagementGlobal]);
 }
 
-public function getEngagementPerPost($clientId)
+ /*public function getEngagementPerPost($clientId)
 {
     // Vérifier que le client existe
     $client = Clients::find($clientId);
@@ -191,10 +195,72 @@ public function getEngagementPerPost($clientId)
     }
    
     return response()->json($engagementPerPost);
-}
+}*/
+public function populateEngagementDWH($clientId)
+{
+    // Vérifier que le client existe
+    $client = Clients::find($clientId);
+    if (!$client) {
+        return response()->json(['error' => 'Client not found'], 404);
+    }
 
+    // Récupérer les posts du client
+    $posts = Posts::where('client_id', $client->id)->get();
+
+    foreach ($posts as $post) {
+        // Remplir Dim_Date
+        $date = Carbon::parse($post->timestamp);
+        $dimDate = DimDate::updateOrCreate(
+            ['full_date' => $date->toDateString()],
+            ['day' => $date->day, 'month' => $date->month, 'year' => $date->year]
+        );
+
+        // Remplir Dim_Post
+        DimPost::updateOrCreate(
+            ['post_id' => $post->post_id],
+            ['caption' => Str::limit($post->caption, 30), 'timestamp' => $post->timestamp]
+        );
+
+        // Calculer l'engagement KPI
+        $kpi = ($post->impressions > 0) ? (($post->like_count + $post->comments_count + $post->shares_count) / $post->impressions) * 100 : 0;
+
+        // Remplir Fact_Engagement
+        FactEngagement::create([
+            'client_id' => $client->id, // Stocke directement client_id
+            'post_id' => $post->post_id,
+            'date_id' => $dimDate->date_id,
+            'engagement_kpi' => round($kpi, 2),
+            'like_count' => $post->like_count,
+            'comments_count' => $post->comments_count,
+            'shares_count' => $post->shares_count,
+            'impressions' => $post->impressions
+        ]);
+    }
+
+    return response()->json(['message' => 'DWH populated successfully']);
+}
         
-        
+public function getEngagementFromDWH($clientId)
+{
+    $engagements = FactEngagement::where('client_id', $clientId)
+        ->with(['post', 'date'])
+        ->get()
+        ->map(function ($engagement) {
+            return [
+                'post_id' => $engagement->post->post_id,
+                'caption' => $engagement->post->caption,
+                'like_count' => $engagement->like_count,
+                'comments_count' => $engagement->comments_count,
+                'shares_count' => $engagement->shares_count,
+                'impressions' => $engagement->impressions,
+                'engagement_kpi' => $engagement->engagement_kpi,
+                'timestamp' => $engagement->post->timestamp,
+                'date' => $engagement->date->full_date
+            ];
+        });
+
+    return response()->json($engagements);
+}   
 public function saveKpi($clientId, $name, $value, $trend, $status)
 {
     // Créer un nouvel enregistrement pour chaque KPI
