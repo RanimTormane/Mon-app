@@ -27,4 +27,5 @@ class Clients extends Model
         return $this->hasMany(KPIs::class, 'client_id');
         
     }
+
 }

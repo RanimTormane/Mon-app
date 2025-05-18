@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\google_Ads;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\FactRoas;
+use App\Models\DimDate;
+use App\Models\DimProduct;
 
 
 class GoogleAdsController extends Controller
@@ -142,7 +145,79 @@ class GoogleAdsController extends Controller
             'roas_global' => round($roasGlobal, 2)
         ]);
         }
+        //DWH
+        public function populateROASDWH()
+    {
+        $adsData = \DB::table('google_ads')
+            ->select(
+                'product_name',
+                \DB::raw('SUM(conversion_value) as total_conversion_value'),
+                \DB::raw('SUM(cost) as total_cost'),
+                \DB::raw('DATE(created_at) as ad_date')
+            )
+            ->groupBy('product_name', 'ad_date')
+            ->get();
+
+        foreach ($adsData as $item) {
+            // Vérifier si ad_date est valide
+            if (!$item->ad_date) {
+                \Log::warning('Date invalide pour product_name: ' . $item->product_name . ', ad_date: ' . $item->ad_date);
+                continue; // Passer à l'itération suivante si la date est invalide
+            }
+
+            try {
+                $date = Carbon::parse($item->ad_date);
+                $dateId = DimDate::firstOrCreate([
+                    'day' => $date->day,
+                    'month' => $date->month,
+                    'year' => $date->year,
+                    'full_date' => $date
+                ])->date_id;
+            } catch (\Exception $e) {
+                \Log::error('Erreur de parsing de la date pour ' . $item->product_name . ': ' . $e->getMessage());
+                continue; // Passer à l'itération suivante en cas d'erreur
+            }
+
+            // Ajouter à Dim_Product
+            $product = DimProduct::firstOrCreate([
+                'product_name' => $item->product_name
+            ], [
+                'category' => null // À enrichir si disponible
+            ]);
+
+            // Calculer ROAS
+            $roas = $item->total_cost > 0 ? round($item->total_conversion_value / $item->total_cost, 2) : 0;
+
+            // Ajouter à Fact_ROAS
+            FactRoas::create([
+                'product_id' => $product->product_id,
+                'date_id' => $dateId,
+                'total_conversion_value' => $item->total_conversion_value,
+                'total_cost' => $item->total_cost,
+                'roas' => $roas
+            ]);
+        }
+
+        return response()->json(['message' => 'ROAS Datamart populated successfully']);
+    }
+
+ 
+
         public function getROASByProduct()
+{
+    $data = FactRoas::select('dim_product.product_name', 'fact_roas.roas')
+        ->join('dim_product', 'fact_roas.product_id', '=', 'dim_product.product_id')
+        ->get()
+        ->map(function ($item) {
+            return [
+                'name' => $item->product_name,
+                'value' => $item->roas
+            ];
+        });
+
+    return response()->json($data);
+}
+      /*  public function getROASByProduct()
         {
         $data = \DB::table('google_ads')
             ->select('product_name', \DB::raw('SUM(conversion_value) as total_conversion_value'), \DB::raw('SUM(cost) as total_cost'))
@@ -157,7 +232,7 @@ class GoogleAdsController extends Controller
             });
         
             return response()->json($result);
-        }
+        }*/
         public function getROASByCampaign()
         {
             $data = \DB::table('google_ads')
@@ -201,7 +276,7 @@ class GoogleAdsController extends Controller
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
             'campaign_name' => 'nullable|string',
-            'min_cost' => 'nullable|numeric',
+           
         ]);
 
         // Requête pour obtenir les données filtrées
@@ -220,11 +295,11 @@ class GoogleAdsController extends Controller
         if ($request->has('campaign_name') && $request->campaign_name) {
             $query->where('campaign_name', 'LIKE', '%' . $request->campaign_name . '%');
         }
+         // Filtrer par nom de produit
+    if ($request->has('product_name') && $request->product_name) {
+        $query->where('product_name', 'LIKE', '%' . $request->product_name . '%');
+    }
 
-        // Filtrer par coût minimal
-        if ($request->has('min_cost') && $request->min_cost) {
-            $query->where('cost', '>=', $request->min_cost);
-        }
 
         // Exécuter la requête et récupérer les données
         $data = $query->get();

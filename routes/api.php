@@ -138,6 +138,8 @@ Route::get('/cac-by-campaign', [GoogleAdsController::class, 'getCACByCampaign'])
 Route::get('/cac-by-month', [GoogleAdsController::class, 'getCACByMonth']);
 Route::get('/cost-by-leads', [GoogleAdsController::class, 'getCostByLeads']);
 Route::get('/ROAS', [GoogleAdsController::class, 'getGlobalROAS']);
+Route::get('/kpi/roas-by-product', [GoogleAdsController::class, 'getROASByProduct']);
+Route::get('/populate-roas-datamart', [GoogleAdsController::class, 'populateROASDWH']);
 Route::get('/ROAS-by-product', [GoogleAdsController::class, 'getROASByProduct']);
 Route::get('/ROAS-by-campaign', [GoogleAdsController::class, 'getROASByCampaign']);
 Route::get('/profit-by-campain', [GoogleAdsController::class, 'getProfitabilityByCampaign']);
