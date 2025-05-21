@@ -57,11 +57,13 @@ Route::post('/export-chart-data', [ExportController::class, 'exportDashboardCsv'
 Route::get('/auth/instagram/callback', [InstagramAuthController::class, 'instagramCallback']);
 Route::get('/auth/instagram', [InstagramAuthController::class, 'redirectToInstagram']);
 
+Route::middleware('auth')->post('/store-instagram-client', [ClientsController::class, 'store']);
 
-Route::post('/store-instagram-client', [ClientsController::class, 'store']);
+//Route::post('/store-instagram-client', [ClientsController::class, 'store']);
 Route::get('/clients', [ClientsController::class, 'index']);
 Route::delete('/clients/delete/{client}',[ClientsController::class, 'destroy']);
 Route::get('client-dashboard/{id}', [ClientsController::class, 'show']);
+Route::middleware('auth')->get('/user/dashboards', [UserController::class, 'getDashboards']);
 
 
 Route::get('/clients/{clientId}/dashboard/{slug}', [ClientsController::class, 'getDashboard']);
@@ -155,3 +157,5 @@ Route::get('/bounce-rate-stats', [TraficStatsController::class, 'bounceRateStats
 Route::get('/pages-vues-session', [TraficStatsController::class, 'getVisitPagesBySession']);
 Route::get('/new-visitors-date', [TraficStatsController::class, 'getNewVisitors']);
 Route::post('/traffic-filter',[TraficStatsController::class,'filterTraficData']);
+
+Route::get('/instagramAccountByUser/{userId}', [ClientsController::class, 'getByUserId']);

@@ -65,6 +65,7 @@ class ClientsController extends Controller
                 'profile_picture_url' => $data['profile_picture_url'] ?? null,
               
                'dashboards' => json_encode($dashboards),
+                   'user_id' => auth()->id(), // ✅ LIAISON AVEC L’UTILISATEUR CONNECTÉ
             ]
         );
         
@@ -82,7 +83,17 @@ class ClientsController extends Controller
     }
 }
 
+ public function getByUserId($userId)
+    {
+        // Récupérer le compte Instagram lié au user_id
+        $account = Clients::where('user_id', $userId)->first();
 
+        if ($account) {
+            return response()->json($account, 200);
+        } else {
+            return response()->json(['error' => 'Compte Instagram non trouvé'], 404);
+        }
+    }
     
 
     /**

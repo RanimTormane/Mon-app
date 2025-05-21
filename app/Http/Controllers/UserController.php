@@ -151,4 +151,30 @@ public function changePassword(changePassword $request)
     ], 200);
 }
 
+
+ public function getDashboards()
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Utilisateur non authentifié.'], 401);
+        }
+
+        $instagram = $user->instagramAccount;
+
+        if (!$instagram) {
+            return response()->json([
+                'user' => $user->name,
+                'dashboards' => [],
+                'message' => 'Aucun compte Instagram lié à cet utilisateur.'
+            ]);
+        }
+
+        return response()->json([
+            'user' => $user->name,
+            'instagram_username' => $instagram->username,
+            'dashboards' => $instagram->dashboards ?? [],
+        ]);
+    }
+
 }

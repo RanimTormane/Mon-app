@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('instagram_account', function (Blueprint $table) {
             $table->id();
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('instagram_id')->unique();
             $table->string('username');
             $table->text('profile_picture_url')->nullable();
-             //$table->unsignedBigInteger('api_id'); // clé étrangère
+            //$table->unsignedBigInteger('api_id'); // clé étrangère
 
-    //$table->foreign('api_id')->references('id')->on('apis')->onDelete('cascade');
-           
+            //$table->foreign('api_id')->references('id')->on('apis')->onDelete('cascade');
+
             $table->text('dashboards')->nullable();
            
             $table->timestamps();

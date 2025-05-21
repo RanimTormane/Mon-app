@@ -19,7 +19,7 @@ class PostsController extends Controller
     
     public function getEngagementData(Request $request)
     {
-        // Récupère l'access_token et client_id depuis les paramètres de la requête
+        // Récupère l'access_token et client_id depuis les paramètres de la requête /ils sont transmis via l'URL (en GET)/ essentiels pour faire l’appel à l’API Instagram.
         $accessToken = $request->query('access_token');
         $clientId = $request->query('client_id');
         $apiId =$request->query('api_id');
@@ -28,7 +28,7 @@ class PostsController extends Controller
             return response()->json(['error' => 'Access Token and Client ID are required'], 400);
         }
     
-        // Récupérer le client dans la base de données
+        // Récupérer le client dans la base de données/Vérification de l'existence du client et de l’api
         $client = Clients::where('instagram_id', $clientId)->first();
         $api = API::find($apiId);
         if (!$api) {
@@ -38,10 +38,11 @@ class PostsController extends Controller
             return response()->json(['error' => 'Client not found'], 404);
         }
     
-        // Créer l'URL pour l'API Instagram
+        // Créer l'URL pour l'API Instagram afin de récupérer les posts du clinet 
         $url = "https://graph.instagram.com/$clientId/media?fields=caption,comments_count,like_count,shares_count,insights.metric(impressions)&access_token=$accessToken";
     
         // Effectuer la requête à l'API
+        //utilise la classe http pour envoyer la requete GET 
         $response = Http::withOptions(['verify' => false])->get($url);
     
         // Vérifier si la requête a réussi
@@ -71,15 +72,16 @@ class PostsController extends Controller
             $transformedData = [];
         
             foreach ($rawData as $post) {
+                //Je vérifie que l’identifiant du post existe (car id=c’est la clé principale).
                 if (isset($post['id'])) {
                     $impressions = 0;
-                    // Récupérer les impressions si elles existent dans les insights
+                    // Récupérer les impressions si elles existent dans les insights/Si oui, je les récupère. Sinon, je laisse à zéro.
                     if (isset($post['insights']['data'][0]['values'][0]['value'])) {
                         $impressions = $post['insights']['data'][0]['values'][0]['value'];
                     }
 
                     $transformedData[] = [
-                        
+                        //Je sécurise chaque champ avec isset() pour éviter les erreurs si certaines données manquent.
                         'post_id' => $post['id'],
                         'caption' => isset($post['caption']) ? $post['caption'] : '',
                         'like_count' => isset($post['like_count']) ? $post['like_count'] : 0,
@@ -89,7 +91,7 @@ class PostsController extends Controller
                         
                         'engagement' => (isset($post['like_count']) ? $post['like_count'] : 0) + (isset($post['comments_count']) ? $post['comments_count'] : 0),
                         'timestamp' => isset($post['timestamp']) ? Carbon::parse($post['timestamp'])->toDateTimeString() : now(), // Définit une valeur par défaut si la date est manquante
-
+//J’utilise Carbon pour transformer la date en un format lisible
                     ];
                 }
             }
@@ -107,7 +109,7 @@ if (!$client) {
     return response()->json(['error' => 'Client not found'], 404);
 }
 
-
+//On boucle sur chaque post transformé qu'on veut stocker.
             foreach ($postsData as $post) {
                 // Vérifier si le post existe déjà dans la base de données
                 $existingPost = posts::where('post_id', $post['post_id'])->first();
@@ -142,13 +144,13 @@ if (!$client) {
     if (!$client) {
         return response()->json(['error' => 'Client not found'], 404);
     }
-
+    // Agrégation des données d’engagement
     // Calculer les total likes, comments, shares et impressions pour le client
     $totalLikes = Posts::where('client_id', $client->id)->sum('like_count');
     $totalComments = Posts::where('client_id', $client->id)->sum('comments_count');
     $totalShares = Posts::where('client_id', $client->id)->sum('shares_count'); // Vérifier la présence de cette colonne
     $totalImpressions = Posts::where('client_id', $client->id)->sum('impressions'); // Vérifier la présence de cette colonne
-
+//Car diviser par 0 n’a pas de sens (et causerait une erreur).
     if ($totalImpressions <= 0) {
         return response()->json(['error' => 'Impressions data is invalid or missing'], 400);
     }
@@ -196,6 +198,7 @@ if (!$client) {
    
     return response()->json($engagementPerPost);
 }*/
+//Remplir un Data Warehouse (DWH)
 public function populateEngagementDWH($clientId)
 {
     // Vérifier que le client existe
@@ -218,6 +221,7 @@ public function populateEngagementDWH($clientId)
         // Remplir Dim_Post
         DimPost::updateOrCreate(
             ['post_id' => $post->post_id],
+            //On limite la taille du texte de la légende à 30 caractères
             ['caption' => Str::limit($post->caption, 30), 'timestamp' => $post->timestamp]
         );
 
@@ -241,10 +245,13 @@ public function populateEngagementDWH($clientId)
 }
         
 public function getEngagementFromDWH($clientId)
-{
+{//Requête avec jointures
+    //On récupère les données de FactEngagement/Avec les relations post et date
     $engagements = FactEngagement::where('client_id', $clientId)
         ->with(['post', 'date'])
         ->get()
+        //map()est une methode qui prend chaque ligne de la table de faits (engagements)
+        // transformes en un format personnalisé
         ->map(function ($engagement) {
             return [
                 'post_id' => $engagement->post->post_id,
@@ -270,7 +277,7 @@ public function saveKpi($clientId, $name, $value, $trend, $status)
     $kpi->value = $value;
     $kpi->trend = $trend;
     $kpi->status = $status;
-  
+
     $kpi->save();
 
     return $kpi;
@@ -280,7 +287,7 @@ public function showAllKpis()
 {
     return KPIs::all();
 }
-    public function getInteractions($clientId){
+public function getInteractions($clientId){
       $client = Clients::find($clientId);
       if(!$client){
         return response()->json(['error'=>'Client not found'],404);//404 error Not Found

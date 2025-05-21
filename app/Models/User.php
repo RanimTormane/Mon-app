@@ -67,4 +67,8 @@ class User extends Authenticatable  implements JWTSubject
     {
         return [];
     }
+    public function instagramAccount()
+{
+    return $this->hasOne(Clients::class, 'user_id');
+}
 }
